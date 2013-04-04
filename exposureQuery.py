@@ -71,25 +71,23 @@ if not (opts.input or (opts.plate and opts.mjd)):
     print "Must specify a plate list file to read or a specific plate and mjd pair!"
     sys.exit(1)
 
-keywords = []
+keywords = ["MJD","SEEING50","RMSOFF50","AIRMASS","ALT"]
 if opts.keyword:
     keywords.append(opts.keyword)
-else:
-    keywords = ["AIRMASS","ALT"]
 
-plateKeywords = ["PLATEID","MJD","SEEING50","RMSOFF50"]
-plugmapKeywords = ["haMin","cartridgeId"]#,"raCen","decCen"]
+plateKeywords = []#,"SEEING50","RMSOFF50"]
+plugmapKeywords = ["haMin"]#,"cartridgeId"]#,"raCen","decCen"]
 
 # APO Geographical Location
 apolat = (32. + 46/60. + 49/3600.)*math.pi/180.
 apolon = -(105. + 49/60. + 13/3600.)*math.pi/180.
 apo = sidereal.LatLon(apolat,apolon)
 
-keys = ['id']
+keys = ['plate','mjd','id']
 keys += plateKeywords
 keys += keywords
 if opts.alt:
-    keys += ['meanAlt','meanHa','designAlt']
+    keys += ['meanAlt','designAlt','meanHa']
 keys += plugmapKeywords
 
 print opts.delim.join([key for key in keys])
@@ -97,26 +95,34 @@ print opts.delim.join([key for key in keys])
 def examineExposures(datadir,speclog,plate,mjd,keywords,outputdir):
     spPlate = Plate(os.path.join(datadir,plate,"spPlate-%s-%s.fits"%(plate,mjd)))
 
-    plan2dfile = os.path.join(datadir,plate,"spPlan2d-%s-%s.par"%(plate,mjd))
+    plan2dfile = os.path.join(datadir,plate,"spPlancomb-%s-%s.par"%(plate,mjd))
     plan2d = yanny.yanny(plan2dfile)
     spexp = plan2d['SPEXP']
     uniqueMapNames = set(zip(spexp['mjd'],spexp['mapname']))
-    if len(uniqueMapNames) != 1:
-        print "warning unique plugmap names != 1"
-        sys.exit(1)
+    #if len(uniqueMapNames) != 1:
+    #    print "warning unique plugmap names != 1"
+    #    sys.exit(1)
     (mapmjd,mapname) = uniqueMapNames.pop()
     plugmapfile = os.path.join(speclog,str(mapmjd),'plPlugMapM-%s.par'%mapname)
     plugmap = yanny.yanny(plugmapfile)
 
+    # Construct list of exposure IDs
     exposureIDs = list()
-    for i in range(len(spexp['flavor'])):
-        if spexp['flavor'][i] == 'science':
-                exposureIDs.append('-'.join(spexp['name'][i][0].split('-')[1:3]).split('.')[0])
-    
+    # for i in range(len(spexp['flavor'])):
+    #     if spexp['flavor'][i] == 'science':
+    #         exposureIDs.append('-'.join(spexp['name'][i][0].split('-')[1:3]).split('.')[0])
+    nexp = spPlate.header["NEXP"]
+    if (nexp % 4) != 0:
+        print "Warning, unexpected number of exposures..."
+    for i in range(nexp/4):
+        exposureIDs.append('-'.join(spPlate.header["EXPID%02d"%(i+1)].split('-')[0:2]))
+
+    # Iterate over exposures and gather information of interest
     exposureData = list()
     for exposure in exposureIDs:
-
         info = dict()
+        info['plate'] = plate
+        info['mjd'] = mjd
         info['id'] = exposure
         # Process Plate header keywords
         for keyword in plateKeywords:
@@ -187,7 +193,8 @@ if opts.input:
         except ValueError:
             print 'error procressing exposures for %s-%s...' % (plate,mjd)
 else:
-    exposureData += examineExposures(opts.datadir,opts.speclog,opts.plate,opts.mjd,keywords)
+    exposureData += examineExposures(datadir=opts.datadir,speclog=opts.speclog,\
+        plate=opts.plate,mjd=opts.mjd,keywords=keywords,outputdir=opts.output)
 
 
 
