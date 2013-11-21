@@ -16,12 +16,12 @@ BSR = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux'
 
 # os.environ['SPECLOG_DIR']
 origSpecLogDir = '/home/boss/products/NULL/speclog/trunk'
-newSpecLogDir = os.path.join(BSR,'test/dmargala/speclog')
+newSpecLogDir = os.path.join('/data/dmargala/speclog')
 
-bossVersion = 'v5_6_5'
-blueVersion = 'test/dmargala/redux/v5_6_5'
+bossVersion = 'v5_6_0'
+blueVersion = 'test/dmargala/redux/v5_6_0'
 
-targetListFilename = '/home/dmargala/blueStandards.txt'
+targetListFilename = '/home/dmargala/blue-standards.txt'
 
 verbose = True
 force = True
@@ -59,7 +59,7 @@ def swapStandards(bluePlateMJDPairDict):
 		# Read spPlan file
 		spPlan = yanny.yanny(spPlanFilename)
 		# Get mjd list of observations for this plate-mjd
-		uniqueMapNames = set(zip(spPlan['SPEXP']['mjd'],spPlan['SPEXP']['mapname']))
+                uniqueMapNames = set(zip(spPlan['SPEXP']['mjd'],spPlan['SPEXP']['mapname']))
 		#print len(bluePlateMJDPairDict[plateMJDPair]) # debug
 		#print plateMJDPair # debug
 		# The plugmaps are saved in files corresponding to the actual 
