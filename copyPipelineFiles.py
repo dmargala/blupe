@@ -11,8 +11,8 @@ import fnmatch
 import subprocess
 
 # Set up appropriate paths
-origBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/v5_6_0'
-newBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/test/dmargala/redux/v5_6_0'
+origBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/v5_6_5'
+newBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/test/dmargala/redux/v5_6_5'
 
 force = False
 
@@ -48,9 +48,9 @@ def copyPipelineFiles():
 		reduxfile.close()
 
 
-		subprocess.call(['pwd'])
-		subprocess.call(['echo','qsub','redux-%s-%s'%(plate,mjd)])
-		subprocess.call(['qsub','redux-%s-%s'%(plate,mjd)])
+		#subprocess.call(['pwd'])
+		#subprocess.call(['echo','qsub','redux-%s-%s'%(plate,mjd)])
+		#subprocess.call(['qsub','redux-%s-%s'%(plate,mjd)])
 
 if __name__ == '__main__':
 	copyPipelineFiles()

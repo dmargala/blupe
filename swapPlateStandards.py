@@ -18,10 +18,10 @@ BSR = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux'
 origSpecLogDir = '/home/boss/products/NULL/speclog/trunk'
 newSpecLogDir = os.path.join(BSR,'test/dmargala/speclog')
 
-bossVersion = 'v5_6_0'
-blueVersion = 'test/dmargala/redux/v5_6_0'
+bossVersion = 'v5_6_5'
+blueVersion = 'test/dmargala/redux/v5_6_5'
 
-targetListFilename = 'blueStandards.txt'
+targetListFilename = '/home/dmargala/blueStandards.txt'
 
 verbose = True
 force = True
@@ -113,6 +113,9 @@ def swapStandards(bluePlateMJDPairDict):
 			sdHdrFixFilename = os.path.join(origSpecLogDir,night,'sdHdrFix-%s.par'%night)
 			if os.path.isfile(sdHdrFixFilename):
 				shutil.copy(sdHdrFixFilename,os.path.join(newSpecLogDir,night,'sdHdrFix-%s.par'%night))
+			guiderMonFilename = os.path.join(origSpecLogDir,night,'guiderMon-%s.par'%night)
+			if os.path.isfile(guiderMonFilename):
+				shutil.copy(guiderMonFilename,os.path.join(newSpecLogDir,night,'guiderMon-%s.par'%night))
 
 if __name__ == "__main__":
 	bluePlateMJDPairDict = parseTargetList(targetListFilename=targetListFilename)
