@@ -16,7 +16,7 @@ BSR = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux'
 
 # os.environ['SPECLOG_DIR']
 origSpecLogDir = '/home/boss/products/NULL/speclog/trunk'
-newSpecLogDir = os.path.join('/data/dmargala/speclog')
+newSpecLogDir = os.path.join('/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/test/dmargala/speclog')
 
 bossVersion = 'v5_6_0'
 blueVersion = 'test/dmargala/redux/v5_6_5'
