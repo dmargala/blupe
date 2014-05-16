@@ -11,9 +11,9 @@ import fnmatch
 import subprocess
 
 # Set up appropriate paths
-origBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/v5_6_0'
-newBSRPath = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/test/dmargala/redux/v5_6_5'
-speclog_dir = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux/test/dmargala/speclog'
+origBSRPath = '/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0'
+newBSRPath = '/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/test/dmargala/redux/v5_7_0'
+speclog_dir = '/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/test/dmargala/speclog'
 
 force = False
 
@@ -33,6 +33,7 @@ def copyPipelineFiles():
                     #print 'The following file already exists, please remove it or run with force to continue:'
                     #print os.path.join(newDir,filename)
                     continue
+                print os.path.join(newDir,filename)
                 shutil.copy(os.path.join(origDir,filename),os.path.join(newDir,filename)) 
         os.chdir(newDir)
         reduxfilename = 'redux-%s-%s'%(plate,mjd)
@@ -41,6 +42,7 @@ def copyPipelineFiles():
 
         for reduxline in reduxfile:
             if "setup" in reduxline:
+                output.append(reduxline)
                 output.append('export SPECLOG_DIR=%s\n'%speclog_dir)
             elif 'v5_6_0' in reduxline:
                 parts = reduxline.split("\"")
@@ -59,8 +61,8 @@ def copyPipelineFiles():
         reduxfile.close()
 
         subprocess.call(['pwd'])
-        subprocess.call(['echo','-q','batch','qsub','redux-%s-%s'%(plate,mjd)])
-        subprocess.call(['qsub','-q','batch','redux-%s-%s'%(plate,mjd)])
+        subprocess.call(['echo','qsub','-q','batch','redux-%s-%s'%(plate,mjd)])
+        #subprocess.call(['qsub','-q','batch','redux-%s-%s'%(plate,mjd)])
 
 if __name__ == '__main__':
     copyPipelineFiles()
