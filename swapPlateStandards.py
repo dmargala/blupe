@@ -38,7 +38,7 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
             # hide the 'standard' boss spectrophoto standards
             bossStandards = np.where(np.array(plugMapOBJs['objType']) == 'SPECTROPHOTO_STD')[0]
             if verbose and len(bossStandards) != 20:
-                print 'Hmmm... There are %d boss standards on plate %s (instead of the usual 20)' % (len(bossStandards), plate)
+                print 'Found %d boss standards on plate %s (expected 20)' % (len(bossStandards), plate)
             for i in bossStandards:
                 plugMapOBJs['objType'][i] = 'NA'
             # set the ancillary targets' objType as "SPECTROPHOTO_STD" by iterating 
@@ -62,8 +62,8 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
                 if clobber:
                     os.remove(newPlugMapFilename)
                 else: 
-                    print 'Modified plugmap file (%s) already exists. Specify --clobber option to overwrite...' % newPlugMapFilename
-                    return -1
+                    print 'Modified plugmap file already exists: %s'% newPlugMapFilename
+                    print ' specify --clobber option to overwrite...' 
             if verbose:
                 print newPlugMapFilename
             plPlugMap.set_filename(newPlugMapFilename)
@@ -147,7 +147,11 @@ def main():
         trimmedPlateMJDPairDict[plateMJDPair] = bluePlateMJDPairDict[plateMJDPair]
     plateMJDListFile.close()
 
-    # create a modified speclog with blue standards and spectrophoto standards swapped
+    if args.verbose:
+        print "Mirroring reduction at: %s" % args.bsr_run2d
+        print "Creating modified speclog with with blue standards and spectrophoto standards swapped..."
+        print " source speclog: %s" % args.speclog_src
+        print " new speclog: %s" % args.speclog_new
     swapStandards(trimmedPlateMJDPairDict, speclog_src=args.speclog_src, 
         speclog_new=args.speclog_new, bsr_run2d=args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
 
