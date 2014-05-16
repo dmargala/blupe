@@ -57,6 +57,8 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
             if not os.path.exists(os.path.join(speclog_new, night)):
                 os.makedirs(os.path.join(speclog_new, night))
             newPlugMapFilename = os.path.join(speclog_new, night, 'plPlugMapM-%s.par' % mapname)
+            if verbose:
+                print newPlugMapFilename
             # yanny will not overwrite files so remove this by hand, in case we are running
             if os.path.isfile(newPlugMapFilename):
                 if clobber:
@@ -64,8 +66,7 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
                 else: 
                     print 'Modified plugmap file already exists: %s'% newPlugMapFilename
                     print ' specify --clobber option to overwrite...' 
-            if verbose:
-                print newPlugMapFilename
+                    continue
             plPlugMap.set_filename(newPlugMapFilename)
             plPlugMap.write()
             # copy sdHdrFix file over
