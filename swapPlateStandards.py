@@ -11,7 +11,7 @@ import shutil
 import yanny
 import argparse
 
-def swapStandards(bluePlateMJDPairDict, bsr_run2d, verbose=False, clobber=False):
+def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, verbose=False, clobber=False):
     for plateMJDPair in sorted(bluePlateMJDPairDict.keys()):
         (plate, mjd) = plateMJDPair
         # build path to spPlan for current plate-mjd
@@ -27,7 +27,7 @@ def swapStandards(bluePlateMJDPairDict, bsr_run2d, verbose=False, clobber=False)
             if verbose:
                 print plate, mjd, night, mapname
             # build path to plPlugMagM for unique mapname
-            plPlugMapFilename = os.path.join(origSpecLogDir, night, 'plPlugMapM-%s.par' % mapname)
+            plPlugMapFilename = os.path.join(speclog_src, night, 'plPlugMapM-%s.par' % mapname)
             # read the plugmap file
             try:
                 plPlugMap = yanny.yanny(plPlugMapFilename)
@@ -54,9 +54,9 @@ def swapStandards(bluePlateMJDPairDict, bsr_run2d, verbose=False, clobber=False)
             if verbose:
                 print 'Found %d blue standards on plate %s (expected %d)' % (nBlueStandards, plate, len(bluePlateMJDPairDict[plateMJDPair]))
             # save the plug map for this night's observation
-            if not os.path.exists(os.path.join(newSpecLogDir,night)):
-                os.makedirs(os.path.join(newSpecLogDir,night))
-            newPlugMapFilename = os.path.join(newSpecLogDir, night, 'plPlugMapM-%s.par' % mapname)
+            if not os.path.exists(os.path.join(speclog_new, night)):
+                os.makedirs(os.path.join(speclog_new, night))
+            newPlugMapFilename = os.path.join(speclog_new, night, 'plPlugMapM-%s.par' % mapname)
             # yanny will not overwrite files so remove this by hand, in case we are running
             if os.path.isfile(newPlugMapFilename):
                 if clobber:
@@ -70,16 +70,16 @@ def swapStandards(bluePlateMJDPairDict, bsr_run2d, verbose=False, clobber=False)
             plPlugMap.write()
             # copy sdHdrFix file over
             sdHdrFixFilename = os.path.join(night, 'sdHdrFix-%s.par' % night)
-            if os.path.isfile(os.path.join(origSpecLogDir, sdHdrFixFilename)):
+            if os.path.isfile(os.path.join(speclog_src, sdHdrFixFilename)):
                 if verbose:
-                    print os.path.join(newSpecLogDir, sdHdrFixFilename)
-                shutil.copy(os.path.join(origSpecLogDir, sdHdrFixFilename), os.path.join(newSpecLogDir, sdHdrFixFilename))
+                    print os.path.join(speclog_new, sdHdrFixFilename)
+                shutil.copy(os.path.join(speclog_src, sdHdrFixFilename), os.path.join(speclog_new, sdHdrFixFilename))
             # copy guiderMon file over
             guiderMonFilename = os.path.join(night, 'guiderMon-%s.par' % night)
-            if os.path.isfile(os.path.join(origSpecLogDir, guiderMonFilename)):
+            if os.path.isfile(os.path.join(speclog_src, guiderMonFilename)):
                 if verbose:
-                    print os.path.join(newSpecLogDir, guiderMonFilename)
-                shutil.copy(os.path.join(origSpecLogDir, guiderMonFilename), os.path.join(newSpecLogDir, guiderMonFilename))
+                    print os.path.join(speclog_new, guiderMonFilename)
+                shutil.copy(os.path.join(speclog_src, guiderMonFilename), os.path.join(speclog_new, guiderMonFilename))
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -148,7 +148,8 @@ def main():
     plateMJDListFile.close()
 
     # create a modified speclog with blue standards and spectrophoto standards swapped
-    swapStandards(trimmedPlateMJDPairDict, args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
+    swapStandards(trimmedPlateMJDPairDict, speclog_src=args.speclog_src, 
+        speclog_new=args.speclog_new, bsr_run2d=args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
 
 if __name__ == "__main__":
     main()
