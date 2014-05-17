@@ -62,7 +62,7 @@ def main():
         for reduxline in reduxfile:
             output.append(reduxline)
             if "setup" in reduxline:
-                output.append('export SPECLOG_DIR=%s\n'%speclog_dir)
+                output.append('export SPECLOG_DIR=%s\n'%args.speclog)
         reduxfile.close()
         reduxfile = open(reduxfilename, 'w')
         reduxfile.writelines(output)
