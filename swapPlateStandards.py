@@ -87,6 +87,7 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
     shutil.copy(os.path.join(speclog_src, "opfiles", "spPlateMinSN2.par"), os.path.join(speclog_new, "opfiles", "spPlateMinSN2.par"))
     shutil.copy(os.path.join(speclog_src, "opfiles", "spPlateZrange.par"), os.path.join(speclog_new, "opfiles", "spPlateZrange.par"))
     shutil.copy(os.path.join(speclog_src, "opfiles", "spPlateList.par"), os.path.join(speclog_new, "opfiles", "spPlateList.par"))
+    shutil.copy(os.path.join(speclog_src, "spPlateList.par"), os.path.join(speclog_new, "spPlateList.par"))
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
