@@ -51,7 +51,7 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
                     # We found a blue standard!! 
                     nBlueStandards += 1
                     plugMapOBJs['objType'][i] = 'SPECTROPHOTO_STD'
-            if verbose:
+            if verbose and  nBlueStandards != len(bluePlateMJDPairDict[plateMJDPair]):
                 print 'Found %d blue standards on plate %s (expected %d)' % (nBlueStandards, plate, len(bluePlateMJDPairDict[plateMJDPair]))
             # save the plug map for this night's observation
             if not os.path.exists(os.path.join(speclog_new, night)):
@@ -107,6 +107,8 @@ def main():
         help = "new speclog directory to write modified plugmap files to")
     parser.add_argument("--bsr-run2d", type=str, default="/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0",
         help = "path to reduction to mirror")
+    parser.add_argument("--no-swap", action="store_true",
+        help = "skip modification of plugmap and file copies, only create filtered plate-mjd list")
     args = parser.parse_args()
 
     # open the observed ancillary target list
@@ -160,6 +162,8 @@ def main():
         print "Creating modified speclog with with blue standards and spectrophoto standards swapped..."
         print " source speclog: %s" % args.speclog_src
         print " new speclog: %s" % args.speclog_new
+
+    #
     swapStandards(trimmedPlateMJDPairDict, speclog_src=args.speclog_src, 
         speclog_new=args.speclog_new, bsr_run2d=args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
 
