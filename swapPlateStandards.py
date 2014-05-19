@@ -26,6 +26,18 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
             night = str(night)
             if verbose:
                 print plate, mjd, night, mapname
+            if not os.path.exists(os.path.join(speclog_new, night)):
+                os.makedirs(os.path.join(speclog_new, night))
+            # Check to see if file exists already
+            newPlugMapFilename = os.path.join(speclog_new, night, 'plPlugMapM-%s.par' % mapname)
+            # yanny will not overwrite files so remove this by hand, in case we are running
+            if os.path.isfile(newPlugMapFilename):
+                if clobber:
+                    os.remove(newPlugMapFilename)
+                else: 
+                    print 'Modified plugmap file already exists: %s'% newPlugMapFilename
+                    print ' specify --clobber option to overwrite...' 
+                    continue
             # build path to plPlugMagM for unique mapname
             plPlugMapFilename = os.path.join(speclog_src, night, 'plPlugMapM-%s.par' % mapname)
             # read the plugmap file
@@ -54,19 +66,8 @@ def swapStandards(bluePlateMJDPairDict, speclog_src, speclog_new, bsr_run2d, ver
             if verbose and  nBlueStandards != len(bluePlateMJDPairDict[plateMJDPair]):
                 print 'Found %d blue standards on plate %s (expected %d)' % (nBlueStandards, plate, len(bluePlateMJDPairDict[plateMJDPair]))
             # save the plug map for this night's observation
-            if not os.path.exists(os.path.join(speclog_new, night)):
-                os.makedirs(os.path.join(speclog_new, night))
-            newPlugMapFilename = os.path.join(speclog_new, night, 'plPlugMapM-%s.par' % mapname)
             if verbose:
                 print newPlugMapFilename
-            # yanny will not overwrite files so remove this by hand, in case we are running
-            if os.path.isfile(newPlugMapFilename):
-                if clobber:
-                    os.remove(newPlugMapFilename)
-                else: 
-                    print 'Modified plugmap file already exists: %s'% newPlugMapFilename
-                    print ' specify --clobber option to overwrite...' 
-                    continue
             plPlugMap.set_filename(newPlugMapFilename)
             plPlugMap.write()
             # copy sdHdrFix file over
