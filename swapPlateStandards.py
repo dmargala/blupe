@@ -157,15 +157,15 @@ def main():
         trimmedPlateMJDPairDict[plateMJDPair] = bluePlateMJDPairDict[plateMJDPair]
     plateMJDListFile.close()
 
-    if args.verbose:
-        print "Mirroring reduction at: %s" % args.bsr_run2d
-        print "Creating modified speclog with with blue standards and spectrophoto standards swapped..."
-        print " source speclog: %s" % args.speclog_src
-        print " new speclog: %s" % args.speclog_new
-
-    #
-    swapStandards(trimmedPlateMJDPairDict, speclog_src=args.speclog_src, 
-        speclog_new=args.speclog_new, bsr_run2d=args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
+    if not args.no_swap:
+        # Modify speclog and copy relevant files to new dir
+        if args.verbose:
+            print "Mirroring reduction at: %s" % args.bsr_run2d
+            print "Creating modified speclog with with blue standards and spectrophoto standards swapped..."
+            print " source speclog: %s" % args.speclog_src
+            print " new speclog: %s" % args.speclog_new
+        swapStandards(trimmedPlateMJDPairDict, speclog_src=args.speclog_src, 
+            speclog_new=args.speclog_new, bsr_run2d=args.bsr_run2d, verbose=args.verbose, clobber=args.clobber)
 
 if __name__ == "__main__":
     main()
