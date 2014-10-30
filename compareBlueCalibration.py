@@ -18,10 +18,10 @@ from matplotlib import pyplot as p
 	
 import yanny
 
-BSR = '/clusterfs/riemann/raid006/bosswork/boss/spectro/redux'
+BSR = '/clusterfs/riemann/raid008/bosswork/boss/spectro/redux'
 
-redVersion = 'v5_6_0'
-blueVersion = 'test/dmargala/redux/v5_6_0'
+redVersion = 'v5_7_0'
+blueVersion = 'test/dmargala/redux/v5_7_0'
 
 colors = ['k','b','g','r','c','y','m']
 linestyles = ['-','--','-.',':']
@@ -412,11 +412,11 @@ if __name__ == '__main__':
 	plateMJDlist = [('6298','56208')]
 	for plate,mjd in plateMJDlist:
 		print 'Creating plots for %s-%s...' % (plate,mjd)
-		plotspFluxcalibRatios(plate,mjd,fiberlist=fiberlist)
+                #plotspFluxcalibRatios(plate,mjd,fiberlist=fiberlist)
 		#plotspFluxcorrRatios(plate,mjd,fiberlist=fiberlist)
 		#plotspFluxdistortRatios(plate,mjd,fiberlist=fiberlist)
-		plotspCFrameRatios(plate,mjd,fiberlist=fiberlist)
+                #plotspCFrameRatios(plate,mjd,fiberlist=fiberlist)
 		#plotspFrameRatios(plate,mjd,fiberlist=fiberlist)
-		#plotspPlateRatios(plate,mjd,fiberlist=fiberlist)
+		plotspPlateRatios(plate,mjd,fiberlist=fiberlist)
 
 
