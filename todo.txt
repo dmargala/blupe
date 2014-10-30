@@ -1,0 +1,22 @@
+python/
+	* transition optparse to argparse
+	* remove hard coded paths from programs
+	* seperate commented out sections from programs into their own programs
+	* remove sidereal dependency, use astropy?
+	* implement rot, scale, x,y-shift fit in python?
+
+
+data/ 
+	* remove old files
+
+bash/
+	* verify complete setup / running scripts
+
+cxx/
+	* is this necessary?
+
+pro/
+	* add comments to better document code functionality
+
+
+General:
