@@ -1,5 +1,5 @@
 // Created 18-Jul-2013 by Daniel Margala (University of California, Irvine) <dmargala@uci.edu>
-// convert guiding offsets to tp correction
+// convert guiding offsets to tp correction 
 // g++ -lboost_program_options guidingtp.cxx -o guidingtp
 
 #include "boost/program_options.hpp"
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     po::options_description cli("Throughput correction");
     double psfmin, psfstep;
     int plate, psfnumsteps;
-    std::string inputName;
+    std::string inputName, prefix;
     cli.add_options()
         ("help,h", "Prints this info and exits.")
         ("verbose", "Prints additional information.")
@@ -70,6 +70,8 @@ int main(int argc, char **argv) {
             "PSF fwhm step size.")
         ("plate,p", po::value<int>(&plate)->default_value(0),
             "Plate number to use.")
+        ("prefix", po::value<std::string>(&prefix)->default_value(""),
+            "tpcorr file prefix.")
         ;
 
     // do the command line parsing now
@@ -96,9 +98,9 @@ int main(int argc, char **argv) {
     std::string outname("tpcorr-"+boost::lexical_cast<std::string>(plate)+".dat");
     std::ofstream out(outname.c_str());
 
-    std::string inlabelname("guidederivs/plate-"+boost::lexical_cast<std::string>(plate)+"-label.dat");
-    std::string in4000name("guidederivs/plate-"+boost::lexical_cast<std::string>(plate)+"-4000.dat");
-    std::string in5400name("guidederivs/plate-"+boost::lexical_cast<std::string>(plate)+"-5400.dat");
+    std::string inlabelname(prefix+boost::lexical_cast<std::string>(plate)+"-label.dat");
+    std::string in4000name(prefix+boost::lexical_cast<std::string>(plate)+"-4000.dat");
+    std::string in5400name(prefix+boost::lexical_cast<std::string>(plate)+"-5400.dat");
 
     std::cout << "reading " << inlabelname << std::endl;
     std::ifstream inlabels(inlabelname.c_str());
