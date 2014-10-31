@@ -1,0 +1,182 @@
+%\documentclass[oneside,10pt]{article}
+\documentclass[useAMS,usenatbib]{mn2e}
+
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{url}
+
+\usepackage[a4paper,margin=2cm,footskip=1cm]{geometry}
+
+\pdfminorversion=5
+\pdfobjcompresslevel=2
+
+\providecommand{\eqn}[1]{eqn.~(\ref{eqn:#1})}
+\providecommand{\tab}[1]{Table~\ref{tab:#1}}
+\providecommand{\fig}[1]{Figure~\ref{fig:#1}}
+
+\title[BOSS DR12 Quasar Spectra Calibration Correction]{BOSS DR12 Quasar Spectra Calibration Correction}
+\author[D. Margala and D. Kirkby]{D. Margala$^{1}$\thanks{E-mail:dmargala@uci.edu} and D. Kirkby$^{1}$\\
+$^{1}$Frederick Reines Hall, Department of Physics and Astronomy, University of California, Irvine, CA, U.S.A.}
+\begin{document}
+
+\date{Accepted 2014 September 1. Received 2014 September 1; in original form 2014 September 1}
+
+\pagerange{\pageref{firstpage}--\pageref{lastpage}} \pubyear{2014}
+
+\maketitle
+
+\label{firstpage}
+
+\begin{abstract}
+We present a correction for the effects of atmospheric differential refraction of light and guiding offsets, using focal-plane offsets calculated assuming an ideal guiding scenario for individual observations, of quasar all BOSS DR12 quasar targets which is present due the standard calibration procedure with spectrophotometric standard stars that are offset in the focal plane.
+\end{abstract}
+
+
+\section{Introduction}
+
+Most BOSS targets are drilled to optimize their throughput at 5400\AA. However, quasar targets are optimized for throughput at 4000\AA~by introducing focal plane offsets. An unavoidable side effect of these offsets is to significantly complicate the spectrophotometric calibration of quasar targets using standard stars that do not have the same offsets applied. In particular, atmospheric differential refraction (ADR) and guiding offsets lead to potentially large spectral distortions that are not accounted for in the standard BOSS pipeline, leading to ``calibrated'' exposure sequences such as the one illustrated in Figure (insert figure here).
+
+The effects of ADR are relatively well understood and straightforward to model.\footnote{\url{http://emtoolbox.nist.gov/Wavelength/Ciddor.asp}}\footnote{\url{http://mintaka.sdsu.edu/GF/explain/atmos_refr/models/Cassini.html}}
+
+\section{Model}
+
+The correction for each individual target is calculated by estimating the throughput using the actual fiber hole positions and assuming they were positioned using the same focal-plane offset as the calibration targets.
+
+\subsection{Throughput Calculation}
+
+The throughput for a target is estimated as the overlap fraction, of a 2D Gaussian with variance, $\sigma^2$, offset a distance, $d$, from the center of a circle with diameter $D$ is given by:
+
+\begin{equation}
+\label{eq:overlap}
+f(\sigma,d,D) = \frac{1}{\sigma ^2}\int_{0}^{D/2}  r e^{-\frac{d^2+r^2}{2 \sigma ^2}} I_{0}\left[\frac{r d}{\sigma ^2}\right] \mathrm{d}r
+\end{equation}
+
+where $I_n(z)$ is a modified Bessel function of the first kind. BOSS fibers have a diameter of 2 arcseconds, so we use this value for D throughout. See \fig{overlap}.
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/overlap}
+\caption{Overlap fraction example.}
+\label{fig:overlap}
+\end{figure}
+
+The flux throughput correction at a wavelength $\lambda$ is defined as:
+
+\begin{equation}
+\label{}
+C(\lambda,\sigma_{psf},h) = \frac{f(\sigma_{psf},d(\lambda,h,\lambda_{eff}))}{f(\sigma_{psf},d(\lambda,h,\lambda_{cal}))}
+\end{equation}
+
+For BOSS quasar targets, $\lambda_{eff} = 4000$~\AA~and $\lambda_{cal} = 5400$~\AA~because the quasars are calibrated using standard stars offset in the focal-plane. 
+
+The offset distance, $d$, is determined by the guiding model.
+
+\subsection{Ideal Guiding Model}
+
+A guiding model is used to calculate fiber center offsets instead of the formulas above. The guide model determines scale, rotation, and shift corrections to the plate position in order to minimize offsets of the guide stars from the center of their drilled fiber holes. The light path from a target for several different wavelengths for a typical targer is shown in \fig{fiber_hole}. The light path pattern across an entire plate is shown in \fig{plate_guide}. Guiding offsets have a quadrupole structure across the focal plane.
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/adr-fiber}
+\caption{The black circle represents the fiber hole specified by the information in the upper left inset. The colored lines represent paths of light at specific wavelengths (specified in the lower right inset) as a function of observing hour angle for an ideal guiding model. The observing hour angle window shown here is +/- 3 hours from the design hour angle of the plate, indicated in the upper right inset. The dashed gray lines indicate the target's refracted footprint corresponding to the hour angle of actual exposures for this target.}
+\label{fig:fiber_hole}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/adr-plate}
+\caption{The ideal guiding model for an entire plate. The black circle indicates the size of a BOSS plate. The colored lines represent a target's $\lambda_{eff}$ light path spanning the plate's observed hour angle range (indicated in the upper right inset). Red (blue) lines indicate $\lambda_{eff}$ = 5400~\AA~(4000~\AA) targets. The offset distances have been scaled by a factor of 1000.}
+\label{fig:plate_guide}
+\end{figure}
+
+\section{Results}
+
+The Ideal Guiding model gives a correction at each 4000~\AA~fiber. 
+
+\fig{correction} compares the model predications to the actual ADR effect determined from the ``blue standard'' ancillary science program.
+
+\begin{figure*}
+\centering
+\includegraphics[width=168mm]{fig/tpratio}
+\caption{The corrections for all $\lambda_{eff}$ = 4000~\AA~targets on a plate using the mean observing hour angle and mean PSF size. The transparent lines correspond to correction curves for individual targets while the thick opaque lines correspond the coadded spectrum ratios of the standard and alternate reductions for ancillary targets on this plate. The blue and red colors indicate fibers 1-500 and 501-1000 respectively.}
+\label{fig:correction}
+\end{figure*}
+
+\subsection{Correction Parametrization}
+
+We fit a model to the tabulated corrections.
+
+\begin{equation}
+y = 1 + a_1 \log x/x_0 + a_2 (\log x/x_0)^2
+\end{equation}
+
+See \fig{param} for example fit results.
+
+\begin{figure*}
+\centering
+\includegraphics[width=168mm]{fig/param}
+\caption{Example parametrization fit results.}
+\label{fig:param}
+\end{figure*}
+
+\subsection{Validation}
+
+Clearly demonstarte calibration issue. 
+
+Individual plate comparison.
+
+\subsubsection{Ancillary Program}
+
+We propose to target spectrophotometric standard stars using the same focal-plane offset that is applied to quasar targets. The objectives of this proposal are to:
+
+\begin{itemize}
+	\item Calibrate quasar spectra in future observations using the existing pipeline spectrophotometric calibration algorithms combined with offset standard stars. The resulting quasar sample potentially improves any analysis of quasar spectra, and offers a straightforward method for studying the systematics of the present calibration scheme.
+	\item Use existing models of the relatively straightforward ADR effects to isolate the effects of guiding errors by comparing standard stars observed with and without offsets in future observations. This offers a potentially valuable new approach for directly monitoring the effects of guiding errors on throughput.
+	\item Develop a combined global spectrophotometric calibration that uses standard stars with and without offsets to calibrate all targets on a plate. This would require developing and testing new algorithms but has the potential to improve the calibration of all targets, not just quasars.
+\end{itemize}
+
+We are requesting 20 fibers per plate (~3 per square degree) to match the current number of spectrophotometric standard stars without focal plane offsets that are targeted per plate. Note that the requested density is determined by the expected scale of spatial variations in the spectrophotometric calibration rather than the density of the quasar targets.
+
+The number of spectrophotometric standard stars required is determined by the large-scale throughput variation across a plate. Ideally, we would like to use the existing targeting algorithm to target an additional ~3 spectrophotometric standard stars per square degree to achieve the same plate coverage (20 per plate) as the existing spectrophotometric standard star targeting. We do not consider incompleteness to be a concern. The program would benefit by having a spatial homogeneity similar to the existing spectrophotometric standard star targeting distribution over a plate. The target density on the sky for the full list of targets used by the existing spectrophotometric standard star selection is shown in Figure 8.
+
+The full list of targets used by the existing spectrophotometric standards star selection is available at %\url{https://trac.sdss3.org/wiki/BOSS/target/releases/main008}
+
+At the end of the day we ended up with approximately 79 plates with targets.
+
+\subsubsection{Alternate Reduction}
+
+Modify the pipeline input files so that the ancillary targets are labeled as spectrophotometric standards. Run the pipeline on the ancillary plates. Results are available at blahblahblah.
+
+\subsubsection{Other Samples}
+
+Any comparison of targets observed in both SDSS/BOSS?
+
+Revisit viability of using failed quasar targets as a possible sample?
+
+Since roughly half of the quasar targets in the BOSS DR9 sample are actually stars, it is possible that sufficient observations of spectrophotometric standard stars in fiber holes with quasar focal plane offsets already exist. To investigate this, we examine the color distributions of objects targeted as quasars but classified as stars by the spectroscopic pipeline and compare the results to the spectrophotometric standard star targets. Figure 7 illustrates that there is a small fraction of failed quasars that have bright enough r-band magnitudes but fewer than 0.2\% pass the color space selection cuts for BOSS spectrophotometric standard stars. We estimate that we would need ~35\% passing the color space selection cuts (assuming ideal sky coverage) in order to match the number of targeted spectrophotometric standards without focal plane offsets, so clearly the existing failed quasar sample is not sufficient to meet the goals of this proposal.
+
+\section{Conclusion}
+
+The corrections proposed here seem reasonable.
+
+These results also demonstrate the limitations of attempting to correct the quasar spectrophotometric calibration as a post-processing step after of the pipeline, where many simplifying assumptions are required. We believe that in order to achieve better results, it is necessary and desirable to use as much of the existing pipeline calibration algorithms as possible but with spectrophotometric standards observed with the same focal-plane offsets as the quasar targets. In short of including spectrophotometric standards with focal plane offsets, the throughput corrections described here can be applied as a preprocessing step instead of a postprocessing as it has been done here.
+
+
+\section*{Acknowledgments}
+
+I would like to thank the academy...
+
+\begin{thebibliography}{99}
+\bibitem[\protect\citeauthoryear{Baird}{1981}]{b1} Baird S.R., 1981,
+ApJ, 245, 208
+\bibitem[\protect\citeauthoryear{Beichman et al.}{1985a}]{b2} Beichman
+C.A., Neugebauer G., Habing H.J., Clegg P.E., Chester T.J., 1985a,
+{\it IRAS\/} Point Source Catalog. Jet Propulsion Laboratory,
+Pasadena
+\end{thebibliography}
+
+\bsp
+
+\label{lastpage}
+
+\end{document}
