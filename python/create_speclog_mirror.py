@@ -107,7 +107,7 @@ def main():
         else:
             raise ValueError('Source file does not exist: %s' % from_name)
 
-    
+
     copy_speclog_file('spPlateList.par')
 
     # copy opfiles
@@ -139,7 +139,7 @@ def main():
         # observation nights, not necessarily the last night (which is part of the target identifier)
         for night, mapname in unique_mapnames:
             night = str(night)
-            if verbose:
+            if args.verbose:
                 print plate, mjd, night, mapname
             if not os.path.exists(os.path.join(args.speclog_to, night)):
                 os.makedirs(os.path.join(args.speclog_to, night))
