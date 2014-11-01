@@ -105,7 +105,7 @@ def main():
             if not args.dry_run:
                 shutil.copy(from_name, to_name)
         else:
-            raise ValueError('Source file does not exist: %s' % from_name)
+            print 'Warning: Source file does not exist: %s' % from_name
 
 
     copy_speclog_file('spPlateList.par')
