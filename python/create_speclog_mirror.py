@@ -92,7 +92,7 @@ def main():
         print 'Creating modified speclog with with blue standards and spectrophoto standards swapped...'
         print ' source speclog: %s' % args.speclog_from
         print ' new speclog: %s' % args.speclog_to
-        print '\n'
+        print ''
 
     def copy_speclog_file(name):
         from_name = os.path.join(args.speclog_from, name)
@@ -106,7 +106,6 @@ def main():
                 shutil.copy(from_name, to_name)
         else:
             print 'Warning: Source file does not exist: %s' % from_name
-
 
     copy_speclog_file('spPlateList.par')
 
@@ -122,6 +121,7 @@ def main():
         # read blue standards list
         target_file = os.path.join(args.work_dir, plate, 'blue-stds-%s-%s.txt' % plate_mjd_pair)
         if args.verbose:
+            print ''
             print 'Reading targets list: %s' % target_file
         fiberids = []
         with open(target_file,'r') as targetlist:
@@ -140,7 +140,7 @@ def main():
         for night, mapname in unique_mapnames:
             night = str(night)
             if args.verbose:
-                print plate, mjd, night, mapname
+                print '... processing night, mapname: %s, %s' % night, mapname
             if not os.path.exists(os.path.join(args.speclog_to, night)):
                 os.makedirs(os.path.join(args.speclog_to, night))
             # copy sdHdrFix file over
