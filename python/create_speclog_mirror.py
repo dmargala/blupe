@@ -87,17 +87,18 @@ def main():
         plate_mjd_list.append((plate, mjd))
 
     if args.verbose:
-        print 'Read %d from file: %s' % (len(plate_mjd_list), args.input)
+        print 'Read %d plate-mjd pairs from file: %s' % (len(plate_mjd_list), args.input)
         print 'Mirroring reduction at: %s' % args.bsr_run2d
         print 'Creating modified speclog with with blue standards and spectrophoto standards swapped...'
         print ' source speclog: %s' % args.speclog_from
         print ' new speclog: %s' % args.speclog_to
+        print '\n'
 
     def copy_speclog_file(name):
         from_name = os.path.join(args.speclog_from, name)
         to_name = os.path.join(args.speclog_to, name)
         if os.path.isfile(from_name):
-            if not args.clobber and os.path.isfile(to_name):
+            if not args.clobber and os.path.isfile(to_name) and not args.dry_run:
                 raise ValueError('Destination file already exists: %s' % to_name)
             if args.verbose:
                 print os.path.join(to_name)
@@ -106,6 +107,7 @@ def main():
         else:
             raise ValueError('Source file does not exist: %s' % from_name)
 
+    
     copy_speclog_file('spPlateList.par')
 
     # copy opfiles
@@ -115,15 +117,16 @@ def main():
     for opfile in opfiles:
         copy_speclog_file(os.path.join('opfiles', opfile))
 
-    for plate_mjd_pair in sorted(plate_mjd_list):
+    for plate_mjd_pair in plate_mjd_list:
         (plate, mjd) = plate_mjd_pair
         # read blue standards list
         target_file = os.path.join(args.work_dir, plate, 'blue-stds-%s-%s.txt' % plate_mjd_pair)
+        if args.verbose:
+            print 'Reading targets list: %s' % target_file
         fiberids = []
         with open(target_file,'r') as targetlist:
             for line in targetlist:
                 plate_mjd_fiber = line.strip().split('-')
-                assert (plate == plate_mjd_fiber[0]) and (mjd == plate_mjd_list[1])
                 fiberids.append(plate_mjd_fiber[2])
         # build path to spPlan for current plate-mjd
         plan_name = os.path.join(args.bsr_run2d, plate, 'spPlancomb-%s-%s.par' % plate_mjd_pair)
