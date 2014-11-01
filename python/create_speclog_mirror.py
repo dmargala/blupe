@@ -12,7 +12,7 @@ import shutil
 import yanny
 import argparse
 
-def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids, verbose=False):
+def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids, clobber, verbose):
     # build path to plPlugMagM for unique mapname
     plugmap_name = os.path.join(speclog_from, night, 'plPlugMapM-%s.par' % mapname)
     new_plugmap_name = os.path.join(speclog_to, night, 'plPlugMapM-%s.par' % mapname)
@@ -20,12 +20,12 @@ def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids,
     # Check to see if file exists already
     # yanny will not overwrite files so remove this by hand, in case we are running
     if os.path.isfile(new_plugmap_name):
-        if args.clobber:
+        if clobber:
             os.remove(new_plugmap_name)
         else: 
             print 'Modified plugmap file already exists: %s'% new_plugmap_name
             print ' use --clobber option to overwrite...' 
-            continue
+            return -1
 
     # read the plugmap file
     try:
@@ -139,7 +139,7 @@ def main():
             # copy guiderMon file over
             copy_speclog_file(os.path.join(night, 'guiderMon-%s.par' % night))
             # copy plPlugMapM file and swap standards' OBJTYPE
-            swap_plugmap_stds(args.speclog_from, args.speclog_to, plate, night, mapname, fiberids, args.verbose)
+            swap_plugmap_stds(args.speclog_from, args.speclog_to, plate, night, mapname, fiberids, args.clobber, args.verbose)
 
 
 if __name__ == '__main__':
