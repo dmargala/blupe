@@ -72,6 +72,8 @@ def main():
         help="path to reduction to mirror")
     parser.add_argument("--speclog-to", type=str, default="/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/test/dmargala/speclog",
         help="destination speclog directory to write modified plugmap files to")
+    parser.add_argument("--work-dir", type=str, default="",
+        help="Working directory")
     args = parser.parse_args()
 
     # Read list of plate, mjd pairs to process
