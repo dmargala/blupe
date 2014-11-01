@@ -140,7 +140,7 @@ def main():
         for night, mapname in unique_mapnames:
             night = str(night)
             if args.verbose:
-                print '... processing night, mapname: %s, %s' % night, mapname
+                print '... processing night, mapname: %s, %s' % (night, mapname)
             if not os.path.exists(os.path.join(args.speclog_to, night)):
                 os.makedirs(os.path.join(args.speclog_to, night))
             # copy sdHdrFix file over
