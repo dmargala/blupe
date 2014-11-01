@@ -38,17 +38,19 @@ def main():
     if args.verbose:
         print 'Creating mirror of %s at %s' % (path_from, path_to)
 
-    # read in list of plates to copy
+    # file patterns to copy over to new working directory
+    patterns = ['spFlat*', 'spArc*', 'spFrame*', 'photo*', '*.par']
+
+    # read in list of plate-mjd observations to mirror
     for line in open(args.input,'r'):
         (plate, mjd) = line.strip().split()
-        
+
         plate_path_from = os.path.join(path_from, plate)
         plate_path_to = os.path.join(path_to, plate)
         if not os.path.exists(plate_path_to):
             os.makedirs(plate_path_to)
 
-        # file patterns to copy over to new working directory
-        patterns = ['spFlat*', 'spArc*', 'spFrame*', 'photo*', '*.par', 'redux-%s-%s' % (plate, mjd)]
+        # copy pipeline input files
         for filename in os.listdir(plate_path_from):
             if any(fnmatch.fnmatch(filename, p) for p in patterns):
                 fullname_from = os.path.join(plate_path_from, filename)
@@ -61,24 +63,24 @@ def main():
                 if not args.dry_run:
                     shutil.copy(fullname_from, fullname_to)
 
-        # change into working directory
-        os.chdir(plate_path_to)
         # modify the submission script so it doesn't overwrite custom env variables
-        reduxfilename = 'redux-%s-%s' % (plate, mjd)
-        if args.verbose:
-            print 'Modifying submission script: %s' % reduxfilename
-        with open(reduxfilename,'r') as reduxfile:
+        redux_from = os.path.join(plate_path_from, 'redux-%s-%s' % (plate, mjd))
+        redux_to = os.path.join(plate_path_to, 'redux-%s-%s' % (plate, mjd))
+        with open(redux_from, 'r') as reduxfile:
             output = []
             for reduxline in reduxfile:
                 output.append(reduxline)
                 if 'setup' in reduxline:
                     output.append('export SPECLOG_DIR=%s\n' % args.speclog)
         # save modified submission script
+        if args.verbose:
+            print 'Saving modified submission script: %s' % redux_to
         if not args.dry_run:
-            with open(reduxfilename, 'w') as reduxfile:
+            with open(redux_to, 'w') as reduxfile:
                 reduxfile.writelines(output)
 
         # submit job if specified
+        os.chdir(plate_path_to)
         if args.verbose:
             subprocess.call(['pwd'])
             subprocess.call(['echo','qsub','-q','batch','redux-%s-%s' % (plate, mjd)])
