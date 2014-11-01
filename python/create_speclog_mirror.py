@@ -12,7 +12,7 @@ import shutil
 import yanny
 import argparse
 
-def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids, clobber, verbose):
+def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids, dry_run, clobber, verbose):
     # build path to plPlugMagM for unique mapname
     plugmap_name = os.path.join(speclog_from, night, 'plPlugMapM-%s.par' % mapname)
     new_plugmap_name = os.path.join(speclog_to, night, 'plPlugMapM-%s.par' % mapname)
@@ -56,7 +56,8 @@ def swap_plugmap_stds(speclog_from, speclog_to, plate, night, mapname, fiberids,
     if verbose:
         print 'Saving modified plugmap file: %s' % new_plugmap_name
     plugmap.set_filename(new_plugmap_name)
-    plugmap.write()
+    if not dry_run:
+        plugmap.write()
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -64,8 +65,10 @@ def main():
         help="provide more verbose output")
     parser.add_argument("-i","--input", type=str, default="",
         help="input plate, mjd list")
-    parser.add_argument("--clobber", action = "store_true",
+    parser.add_argument("--clobber", action="store_true",
         help="overwrite existing files")
+    parser.add_argument("--dry-run", action="store_true",
+        help="dry run, no copies")
     parser.add_argument("--speclog-from", type=str, default="/home/boss/products/NULL/speclog/trunk",
         help="source speclog directory")
     parser.add_argument("--bsr-run2d", type=str, default="/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0",
@@ -98,7 +101,8 @@ def main():
                 raise ValueError('Destination file already exists: %s' % to_name)
             if args.verbose:
                 print os.path.join(to_name)
-            shutil.copy(from_name, to_name)
+            if not args.dry_run:
+                shutil.copy(from_name, to_name)
         else:
             raise ValueError('Source file does not exist: %s' % from_name)
 
@@ -141,7 +145,7 @@ def main():
             # copy guiderMon file over
             copy_speclog_file(os.path.join(night, 'guiderMon-%s.par' % night))
             # copy plPlugMapM file and swap standards' OBJTYPE
-            swap_plugmap_stds(args.speclog_from, args.speclog_to, plate, night, mapname, fiberids, args.clobber, args.verbose)
+            swap_plugmap_stds(args.speclog_from, args.speclog_to, plate, night, mapname, fiberids, args.dry_run, args.clobber, args.verbose)
 
 
 if __name__ == '__main__':
