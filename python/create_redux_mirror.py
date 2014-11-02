@@ -31,6 +31,8 @@ def main():
         help="dry run")
     parser.add_argument("--clobber", action="store_true",
         help="overwrite existing files")
+    parser.add_argument("--skip-existing", action="store_true",
+        help="skip if file already exits")
     args = parser.parse_args()
 
     path_from = os.path.join(args.bsr_from, args.run2d)
@@ -56,10 +58,15 @@ def main():
                 fullname_from = os.path.join(plate_path_from, filename)
                 fullname_to = os.path.join(plate_path_to, filename)
 
-                if not args.clobber and os.path.isfile(fullname_to):
-                    raise IOError('File already exists, remove it or run with --clobber: %s' % fullname_to)
                 if args.verbose:
                     print fullname_to
+
+                if os.path.isfile(fullname_to):
+                    if args.skip_existing:
+                        continue
+                    elif not args.clobber:
+                        raise IOError('File already exists, remove it or run with --clobber')
+
                 if not args.dry_run:
                     shutil.copy(fullname_from, fullname_to)
 
