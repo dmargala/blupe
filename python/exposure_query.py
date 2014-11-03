@@ -154,7 +154,7 @@ def main():
             
                 alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
 
-                info['mean_alt'] = '%.3f' % (alt.to(u.degree)).degree
+                info['mean_alt'] = '%.3f' % alt
                 if ha > np.pi*u.radian:
                     ha -= 2*np.pi*u.radian
                 info['mean_ha'] = '%.4f' % ha.degree
@@ -163,7 +163,7 @@ def main():
                 design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
                 design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
                 design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-                info['design_alt'] = '%.3f' % (design_alt.to(u.degree)).degree
+                info['design_alt'] = '%.3f' % design_alt
 
             print args.delim.join([str(info[key]) for key in keys])
 
