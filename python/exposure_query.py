@@ -104,7 +104,7 @@ def main():
 
     def examine_exposures(datadir, speclog, plate, mjd, keywords, outputdir):
         plate_name = os.path.join(datadir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
-        plate = Plate(plate_name)
+        spPlate = Plate(plate_name)
 
         plan_name = os.path.join(datadir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
         plan = yanny.yanny(plan_name)
@@ -115,11 +115,11 @@ def main():
 
         # Construct list of exposure IDs
         exposures = list()
-        nexp = plate.header['NEXP']
+        nexp = spPlate.header['NEXP']
         if (nexp % 4) != 0:
             print 'Warning, unexpected number of exposures...'
         for i in range(nexp/4):
-            exposures.append('-'.join(plate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
+            exposures.append('-'.join(spPlate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
 
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
@@ -129,7 +129,7 @@ def main():
             info['id'] = exposure
             # Process Plate header keywords
             for keyword in plate_keywords:
-                info[keyword] = plate.header[keyword]
+                info[keyword] = spPlate.header[keyword]
             # Process CFrame header keywords
             cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits'%exposure))
             for keyword in keywords:
