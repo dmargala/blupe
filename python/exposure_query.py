@@ -19,12 +19,17 @@ from astropy.time import Time
 from astropy.coordinates import EarthLocation
 from astropy import units as u
 from astropy.coordinates import SkyCoord
+from astropy.coordinates import Angle
 
-
-import sidereal
-
-def tai2utc(tai):
-    return tai-(40587*86400)
+def equatorial_to_horizontal(ra, dec, lat, ha):
+    sin_alt = np.sin(dec)*np.sin(lat) + np.cos(dec)*np.cos(lat)*np.cos(ha)
+    alt = np.arcsin(sin_alt)
+    cos_az = (np.sin(dec) - sin_alt*np.sin(lat))/(np.cos(alt)*np.cos(lat))
+    if np.sin(ha) < 0:
+        az = np.arccos(cos_az)
+    else:
+        az = 2*np.pi*u.radian - np.arccos(cos_az)
+    return alt, az
 
 class Fluxcalib(object):
     def __init__(self, fluxcalibfile):
@@ -84,52 +89,18 @@ def main():
     plugmap_keywords = ['haMin']#,'cartridgeId']#,'raCen','decCen']
 
     # APO Geographical Location
-    apolat = (32. + 46/60. + 49/3600.)*math.pi/180.
-    apolon = -(105. + 49/60. + 13/3600.)*math.pi/180.
-    #apo = sidereal.LatLon(apolat,apolon)
-    apolat_str = '32d46m49s'
-    apolon_str = '-105d49m13s'
-    apo = EarthLocation.from_geodetic(apolon_str, apolat_str)
+    apolat = Angle('32d46m49s')
+    apolon = Angle('-105d49m13s')
+    apo = EarthLocation.from_geodetic(apolon, apolat)
 
     keys = ['plate', 'mjd', 'id']
     keys += plate_keywords
     keys += keywords
     if args.alt:
-        keys += ['meanAlt', 'designAlt', 'meanHa']
+        keys += ['mean_alt', 'design_alt', 'mean_ha']
     keys += plugmap_keywords
 
     print args.delim.join([key for key in keys])
-
-    def examine_plate(path, plate, mjd):
-        plate_name = os.path.join(path, plate, 'spPlate-%s-%s.fits' % (plate, mjd))
-        plate = Plate(plate_name)
-
-        taibeg = plate.header['TAI-BEG']
-        taiend = plate.header['TAI-END']
-        taimid = 0.5*(taibeg+taiend)
-        print taimid
-        print taimid/86400
-
-        obs_ra = plate.header['RADEG']
-        obs_dec = plate.header['DECDEG']
-
-        ut = datetime.utcfromtimestamp(tai2utc(taimid))
-
-        pointing = sidereal.RADec(obs_ra*math.pi/180.,obs_dec*math.pi/180.)
-        ha = pointing.hourAngle(ut, apolon) # radians
-
-        print ha*180./math.pi
-
-        time = Time(tai2utc(taimid), format='unix', scale='tai', location=apo)
-        print time.tai
-        print time.mjd
-        lst = time.sidereal_time('mean')
-
-        c = SkyCoord(ra=obs_ra*u.degree, dec=obs_dec*u.degree)
-        lha = (lst - c.ra)
-        print lha.degree
-
-    examine_plate(args.bossdir, args.plate, args.mjd)
 
     def examine_exposures(datadir, speclog, plate, mjd, keywords, outputdir):
         plate_name = os.path.join(datadir, plate, 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -169,51 +140,45 @@ def main():
                 info[keyword] = str(plugmap[keyword])
             # Do fancy stuff
             if args.alt:
-                ra = cframe.header['RADEG']
-                dec = cframe.header['DECDEG']
+                obs_ra = cframe.header['RADEG']
+                obs_dec = cframe.header['DECDEG']
                 taibeg = cframe.header['TAI-BEG']
                 taiend = cframe.header['TAI-END']
+
                 taimid = 0.5*(taibeg+taiend)
-                ut = datetime.utcfromtimestamp(tai2utc(taimid))
+                dec = Angle(obs_dec, u.degree)
+                ra = Angle(obs_ra, u.degree)
+                pointing = SkyCoord(ra=ra, dec=dec)
 
-                time = Time(taibeg, format='unix', scale='tai', location=apo)
-                lst = time.sidereal_time('mean')
+                time = Time(taimid/86400.0, format='mjd', scale='tai')
+                lst = time.sidereal_time('apparent', longitude=apolon)
+                ha = (lst - pointing.ra)
+            
+                alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
 
-                c = SkyCoord(ra=ra*u.degree, dec=dec*u.degree)
-                lha = lst.hour - c.hour
+                info['mean_alt'] = '%.3f' % alt.degree
+                if ha > np.pi*u.radian:
+                    ha -= 2*np.pi*u.radian
+                info['mean_ha'] = '%.4f' % ha.degree
 
-                pointing = sidereal.RADec(ra*math.pi/180.,dec*math.pi/180.)
-                ha = pointing.hourAngle(ut, apolon) # radians
-
-                print lha, ha
-
-                altaz = pointing.altAz(ha, apolat) # AltAz instance
-                info['meanAlt'] = '%.3f' % (altaz.alt*180./math.pi) # degrees
-                if ha > math.pi:
-                    ha -= 2*math.pi
-                info['meanHa'] = '%.4f' % (ha*180./math.pi) # degrees
-
-                design_ra = float(plugmap['raCen'])*math.pi/180.
-                design_dec = float(plugmap['decCen'])*math.pi/180.
-                design_ha = (float(plugmap['haMin'])%360)*math.pi/180.
-                desing_pointing = sidereal.RADec(design_ra, design_dec)
-                # The sidereal altAz calculation bombs for designHa == 0, add a tiny smudge factor
-                if design_ha == 0:
-                    design_ha = 1e-7
-                design_altaz = design_pointing.altAz(design_ha, apolat)
-                info['designAlt'] = '%.3f' % (design_altaz.alt*180./math.pi)
+                design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
+                design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
+                design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
+                desing_pointing = SkyCoord(design_ra, design_dec)
+                design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
+                info['design_alt'] = '%.3f' % design_alt.degree
 
             print args.delim.join([str(info[key]) for key in keys])
 
-    # if args.input:
-    #     with open(args.input) as platelist:
-    #         for line in platelist:
-    #             (plate, mjd) = line.strip().split()
-    #             examine_exposures(datadir=args.datadir, speclog=args.speclog, 
-    #                 plate=plate, mjd=mjd, keywords=keywords, outputdir=args.output)
-    # else:
-    #     examine_exposures(datadir=args.datadir, speclog=args.speclog, 
-    #         plate=args.plate, mjd=args.mjd, keywords=keywords, outputdir=args.output)
+    if args.input:
+        with open(args.input) as platelist:
+            for line in platelist:
+                (plate, mjd) = line.strip().split()
+                examine_exposures(datadir=args.bossdir, speclog=args.speclog, 
+                    plate=plate, mjd=mjd, keywords=keywords, outputdir=args.output)
+    else:
+        examine_exposures(datadir=args.bossdir, speclog=args.speclog, 
+            plate=args.plate, mjd=args.mjd, keywords=keywords, outputdir=args.output)
 
 if __name__ == '__main__':
     main()
