@@ -108,8 +108,7 @@ def main():
 
         plan_name = os.path.join(datadir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
         plan = yanny.yanny(plan_name)
-        spexp = plan['SPEXP']
-        unique_mapnames = set(zip(spexp['mjd'],spexp['mapname']))
+        unique_mapnames = set(zip(plan['SPEXP']['mjd'], plan['SPEXP']['mapname']))
         (mapmjd, mapname) = unique_mapnames.pop()
         plugmap_name = os.path.join(speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
         plugmap = yanny.yanny(plugmap_name)
