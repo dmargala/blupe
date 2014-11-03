@@ -18,7 +18,7 @@ from astropy.io import fits
 from astropy.time import Time
 #from astropy.coordinates import EarthLocation
 from astropy import units as u
-from astropy.coordinates import SkyCoord
+#from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
 
 def equatorial_to_horizontal(ra, dec, lat, ha):
@@ -148,11 +148,10 @@ def main():
                 taimid = 0.5*(taibeg+taiend)
                 dec = Angle(obs_dec, u.degree)
                 ra = Angle(obs_ra, u.degree)
-                pointing = SkyCoord(ra=ra, dec=dec)
 
                 time = Time(taimid/86400.0, format='mjd', scale='tai')
                 lst = time.sidereal_time('apparent', longitude=apolon)
-                ha = (lst - pointing.ra)
+                ha = (lst - ra)
             
                 alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
 
@@ -164,7 +163,6 @@ def main():
                 design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
                 design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
                 design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
-                desing_pointing = SkyCoord(design_ra, design_dec)
                 design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
                 info['design_alt'] = '%.3f' % design_alt.degree
 
