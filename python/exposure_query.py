@@ -16,7 +16,7 @@ import os
 from astropy.io import fits
 
 from astropy.time import Time
-from astropy.coordinates import EarthLocation
+#from astropy.coordinates import EarthLocation
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
@@ -91,7 +91,7 @@ def main():
     # APO Geographical Location
     apolat = Angle('32d46m49s')
     apolon = Angle('-105d49m13s')
-    apo = EarthLocation.from_geodetic(apolon, apolat)
+    #apo = EarthLocation.from_geodetic(apolon, apolat)
 
     keys = ['plate', 'mjd', 'id']
     keys += plate_keywords
