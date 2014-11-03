@@ -16,7 +16,7 @@ import yanny
 from astropy.io import fits
 
 from astropy.time import Time
-#from astropy.coordinates import EarthLocation
+from astropy.coordinates import EarthLocation
 from astropy import units as u
 #from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
@@ -91,7 +91,7 @@ def main():
     # APO Geographical Location
     apolat = Angle('32d46m49s')
     apolon = Angle('-105d49m13s')
-    #apo = EarthLocation.from_geodetic(apolon, apolat)
+    apo = EarthLocation.from_geodetic(apolon, apolat)
 
     keys = ['plate', 'mjd', 'id']
     keys += plate_keywords
@@ -148,13 +148,13 @@ def main():
                 dec = Angle(obs_dec, u.degree)
                 ra = Angle(obs_ra, u.degree)
 
-                time = Time(taimid/86400.0, format='mjd', scale='tai')
-                lst = time.sidereal_time('apparent', longitude=apolon)
+                time = Time(taimid/86400.0, format='mjd', scale='tai', location=apo)
+                lst = time.sidereal_time('apparent')
                 ha = (lst - ra)
             
                 alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
 
-                info['mean_alt'] = '%.3f' % alt.degree
+                info['mean_alt'] = '%.3f' % (alt.to(u.degree)).degree
                 if ha > np.pi*u.radian:
                     ha -= 2*np.pi*u.radian
                 info['mean_ha'] = '%.4f' % ha.degree
@@ -163,7 +163,7 @@ def main():
                 design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
                 design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
                 design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-                info['design_alt'] = '%.3f' % design_alt.degree
+                info['design_alt'] = '%.3f' % (design_alt.to(u.degree)).degree
 
             print args.delim.join([str(info[key]) for key in keys])
 
