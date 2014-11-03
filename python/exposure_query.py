@@ -103,10 +103,10 @@ def main():
     print args.delim.join([key for key in keys])
 
     def examine_exposures(datadir, speclog, plate, mjd, keywords, outputdir):
-        plate_name = os.path.join(datadir, plate, 'spPlate-%s-%s.fits' % (plate, mjd))
+        plate_name = os.path.join(datadir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
         plate = Plate(plate_name)
 
-        plan_name = os.path.join(datadir, plate, 'spPlancomb-%s-%s.par' % (plate, mjd))
+        plan_name = os.path.join(datadir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
         plan = yanny.yanny(plan_name)
         spexp = plan['SPEXP']
         unique_mapnames = set(zip(spexp['mjd'],spexp['mapname']))
