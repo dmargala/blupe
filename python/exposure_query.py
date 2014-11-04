@@ -101,7 +101,7 @@ def main():
         help='specify plate number for single plate-mjd query')
     parser.add_argument('-m', '--mjd', type=str, default=None,
         help='specify mjd for single plate-mjd query')
-    parser.add_argument('-i', '--input', type=str, default=None
+    parser.add_argument('-i', '--input', type=str, default=None,
         help='specify file with plate,mjd entries to query')
     parser.add_argument('--bossdir', type=str, default='/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0', 
         help='path to 2D reduction dir ($BOSS_SPECTRO_REDUX/$RUN2D)')
