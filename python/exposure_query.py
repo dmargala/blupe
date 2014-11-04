@@ -90,7 +90,7 @@ def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys,
     dec = Angle(obs_dec, u.degree)
     ra = Angle(obs_ra, u.degree)
 
-    time = Time(taibeg/86400.0, format='mjd', scale='tai', location=apo)
+    time = Time(taimid/86400.0, format='mjd', scale='tai', location=apo)
     lst = time.sidereal_time('apparent')
     ha = (lst - ra)
 
@@ -119,7 +119,7 @@ def main():
     parser.add_argument('-i', '--input', type=str, help='Input plate list file to read')
     parser.add_argument('-d', '--delim', type=str, default=' ', help='Table deliminator')
     parser.add_argument('--speclog', type=str, help='Speclog base dir $SPECLOG_DIR')
-    parser.add_argument('-o', '--output', type=str, help='Output base directory')
+    parser.add_argument('-o', '--output', type=str, default='', help='Output prefix')
 
     args = parser.parse_args()
 
@@ -149,6 +149,9 @@ def main():
                 plate_mjd_list.append(line.strip().split())
     else:
         plate_mjd_list.append((args.plate, args.mjd))
+
+    mean_psf_fwhm = []
+    mean_ha = []
     
     for plate, mjd in plate_mjd_list: 
         plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -170,10 +173,24 @@ def main():
             exposures.append('-'.join(spPlate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
 
         # Iterate over exposures and gather information of interest
+        psf_fwhm_list = []
+        ha_list = []
         for exposure in exposures:
             cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
             info = examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
             print args.delim.join([str(info[key]) for key in keys])
+
+            psf_fwhm_list.append(info['SEEING50'])
+            ha_list.append(info['mean_ha'])
+
+        mean_psf_fwhm.append(np.mean(psf_fwhm_list))
+        mean_ha.append(np.mean(ha_list))
+
+    if args.output:
+        with open(args.output) as output:
+            for i, (plate, mjd) in enumerate(plate_mjd_list):
+                output.write('%s %s %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i]))
+
 
 if __name__ == '__main__':
     main()
