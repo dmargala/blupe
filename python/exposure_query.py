@@ -35,48 +35,7 @@ def equatorial_to_horizontal(ra, dec, lat, ha):
         az = 2*np.pi*u.radian - np.arccos(cos_az)
     return alt, az
 
-class Fluxcalib(object):
-    def __init__(self, fluxcalibfile):
-        hdulist = fits.open(fluxcalibfile)
-        self.header = hdulist[0].header
-        self.data = hdulist[0].data
-        hdulist.close()
-    
-class CFrame(object):
-    def __init__(self, cframefile):
-        hdulist = fits.open(cframefile)
-        self.header = hdulist[0].header
-        self.flux = hdulist[0].data
-        self.ivar = hdulist[1].data
-        self.mask = hdulist[2].data
-        self.loglam = hdulist[3].data
-        self.wdisp = hdulist[4].data
-        self.sky = hdulist[6].data
-        hdulist.close()
-
-class Plate(object):
-    def __init__(self, platefile):
-        hdulist = fits.open(platefile)
-        self.header = hdulist[0].header
-        self.flux = hdulist[0].data
-        self.ivar = hdulist[1].data
-        self.andmask = hdulist[2].data
-        self.ormask = hdulist[3].data
-        self.wdisp = hdulist[4].data
-        self.sky = hdulist[6].data
-        hdulist.close() 
-
-def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys):
-    info = dict()
-    info['plate'] = plate
-    info['mjd'] = mjd
-    info['id'] = exposure
-    # Process Plate header keywords
-    for keyword in plate_keys:
-        info[keyword] = spPlate.header[keyword]
-    # Process plugmap header keywords
-    for keyword in plugmap_keys:
-        info[keyword] = plugmap[keyword]
+def examine_exposure(info, cframe, cframe_keys):
     # Process CFrame header keywords
     for keyword in cframe_keys:
         info[keyword] = cframe.header[keyword]
@@ -101,18 +60,41 @@ def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys,
         ha -= 2*np.pi*u.radian
     info['mean_ha'] = ha.to(u.degree).value
 
-    design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
-    design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
-    design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
-    design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-    info['design_alt'] = design_alt.to(u.degree).value
 
-    return info 
+class Fluxcalib(object):
+    def __init__(self, name):
+        hdulist = fits.open(name)
+        self.header = hdulist[0].header
+        self.data = hdulist[0].data
+        hdulist.close()
+    
+class CFrame(object):
+    def __init__(self, name):
+        hdulist = fits.open(name)
+        self.header = hdulist[0].header
+        self.flux = hdulist[0].data
+        self.ivar = hdulist[1].data
+        self.mask = hdulist[2].data
+        self.loglam = hdulist[3].data
+        self.wdisp = hdulist[4].data
+        self.sky = hdulist[6].data
+        hdulist.close()
+
+class Plate(object):
+    def __init__(self, name):
+        hdulist = fits.open(name)
+        self.header = hdulist[0].header
+        self.flux = hdulist[0].data
+        self.ivar = hdulist[1].data
+        self.andmask = hdulist[2].data
+        self.ormask = hdulist[3].data
+        self.wdisp = hdulist[4].data
+        self.sky = hdulist[6].data
+        hdulist.close() 
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v','--verbose', action='store_true', help='provide more verbose output')
-    parser.add_argument('-k', '--keyword', type=str, help='header keyword')
     parser.add_argument('-p', '--plate', type=str, help='Plate')
     parser.add_argument('-m', '--mjd', type=str, help='MJD')
     parser.add_argument('--bossdir', type=str, help='Input default boss reduction $BOSS_SPECTRO_REDUX/$RUN2D')
@@ -128,17 +110,15 @@ def main():
         return -1
 
     cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
-    if args.keyword:
-        cframe_keys.append(args.keyword)
-
     plate_keys = []#,'SEEING50','RMSOFF50']
     plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
+    alt_keys = ['mean_alt', 'design_alt', 'mean_ha']
 
     keys = ['plate', 'mjd', 'id']
     keys += plate_keys
     keys += plugmap_keys
     keys += cframe_keys
-    keys += ['mean_alt', 'design_alt', 'mean_ha']
+    keys += alt_keys
 
     print args.delim.join([key for key in keys])
 
@@ -173,18 +153,42 @@ def main():
         for i in range(nexp/4):
             exposures.append('-'.join(spPlate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
 
+        plate_info = {}
+        plate_info['plate'] = plate
+        plate_info['mjd'] = mjd
+        plate_info['exposures'] = exposures
+        # Process Plate header keywords
+        for keyword in plate_keys:
+            plate_info[keyword] = spPlate.header[keyword]
+        # Process plugmap header keywords
+        for keyword in plugmap_keys:
+            plate_info[keyword] = plugmap[keyword]
+
+        design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
+        design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
+        design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
+        design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
+        plate_info['design_alt'] = design_alt.to(u.degree).value
+
         # Iterate over exposures and gather information of interest
         psf_fwhm_list = []
         ha_list = []
         alt_list = []
         for exposure in exposures:
-            cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
-            info = examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
-            print args.delim.join([str(info[key]) for key in keys])
+            exposure_info = dict()
+            exposure_info['id'] = exposure
 
-            psf_fwhm_list.append(info['SEEING50'])
-            ha_list.append(info['mean_ha'])
-            alt_list.append(info['mean_alt'])
+            cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
+
+            examine_exposure(exposure_info, cframe, cframe_keys)
+
+            combined_info = plate_info + exposure_info
+
+            print args.delim.join([str(combined_info[key]) for key in keys])
+
+            psf_fwhm_list.append(exposure_info['SEEING50'])
+            ha_list.append(exposure_info['mean_ha'])
+            alt_list.append(exposure_info['mean_alt'])
 
         mean_psf_fwhm.append(np.mean(psf_fwhm_list))
         mean_ha.append(np.mean(ha_list))
@@ -194,7 +198,6 @@ def main():
         with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
                 output.write('%s %s %.4f %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
-
 
 if __name__ == '__main__':
     main()
