@@ -30,7 +30,7 @@ offset=0L
 
 ; path to plPlugMap file
 speclog_path= '/home/boss/products/NULL/speclog/trunk/'
-plugmapname= speclog_path+strtrim(mapmjd,2)+'/plPlugMapM-'+strtrim(plateid,2)+'-'+strtrim(mapmjd,2)+'-01.par'
+plugmapname= speclog_path+strtrim(mapmjd,2)+'/plPlugMapM-'+strtrim(mapname,2)+'.par'
 splog, plugmapname
 plugmap= yanny_readone(plugmapname, hdr=phdr, /anon)
 
