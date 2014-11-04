@@ -187,7 +187,7 @@ def main():
         mean_ha.append(np.mean(ha_list))
 
     if args.output:
-        with open(args.output) as output:
+        with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
                 output.write('%s %s %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i]))
 
