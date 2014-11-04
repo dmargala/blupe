@@ -172,7 +172,7 @@ def main():
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
             cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
-            info = examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
+            info = examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
             print args.delim.join([str(info[key]) for key in keys])
 
 if __name__ == '__main__':
