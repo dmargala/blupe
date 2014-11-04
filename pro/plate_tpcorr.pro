@@ -20,13 +20,17 @@
 ; REVISION HISTORY:
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
-pro plate_tpcorr, plateid, ha, fwhm, outfilename
+pro plate_tpcorr, plateid, mjd, mapmjd, ha, fwhm, outfilename
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
 ; Assume this is pointing number one and no offset
 pointing=1L
 offset=0L
+
+; path to plPlugMap file
+plugmapname = speclog+'/'+mapmjd+'/plPlugMapM-'+plateid+'-'+mapmjd+'-01.par'
+plugmap = yanny_readone(plugmapname)
 
 ; Set path to directory for the specified plate number
 platedir= plate_dir(plateid)
@@ -35,9 +39,6 @@ platedir= plate_dir(plateid)
 fullfile= platedir+'/plateHolesSorted-'+strtrim(string(f='(i6.6)',plateid),2)+'.par'
 splog, 'Opening plateHoles file: '+fullfile
 check_file_exists, fullfile, plateid=plateid
-
-; path to plPlugMap file
-plugmapname = platedir+'/plate'
 
 ; Parse contents of input file, 
 ; the input file has a global header and a data entry with multiple fields for each fiber
@@ -71,6 +72,8 @@ lambda= full[igood].lambda_eff ;; e.g., 5400 for LRGs, 4000 for QSOs, 16600 for 
 xforig= full[igood].xfocal
 yforig= full[igood].yfocal
 
+fiberids = plugmap[igood].fiberid
+
 ; Calculate xfocal and yfocal for this pointing (should be similar 
 ; to xforig/yforig up to round-off)
 plate_ad2xy, definition, default, pointing, offset, ra, dec, $
@@ -98,6 +101,8 @@ focuson= 4000.
 i4000= where(full[igood].lambda_eff eq focuson, n4000)
 xfocal4000= xfocal[i4000]
 yfocal4000= yfocal[i4000]
+
+fiberids4000 = fiberids[i4000]
 
 ;; Apply rotation, scale, shift adjustments (i4000 targets)
 ha_apply, xfocal4000, yfocal4000, xnew=xfocal4000_exp, ynew=yfocal4000_exp, rot=rot, scale=scale, $
@@ -151,7 +156,7 @@ openw, 1, outfilename
 ; iterate over targets
 for i=0L, n4000-1L do begin
   ; print x,y location
-	printf, 1, format='(%"%f %f ",$)', xfocal4000[i], yfocal4000[i]
+	printf, 1, format='(%"%d %f %f ",$)', fiberids4000[i], xfocal4000[i], yfocal4000[i]
   ; print tabulated throughput corrections
 	for j=0L, nlambda-1L do begin
  		   printf, 1, format='(%"%f ",$)', tpcorr[i,j]
