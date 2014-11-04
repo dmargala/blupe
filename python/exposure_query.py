@@ -61,22 +61,22 @@ class Plate(object):
         self.sky = hdulist[6].data
         hdulist.close() 
 
-def examine_exposure(spPlate, plugmap, plate, mjd, exposure, keywords):
+def examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys):
 
     info = dict()
     info['plate'] = plate
     info['mjd'] = mjd
     info['id'] = exposure
     # Process Plate header keywords
-    for keyword in plate_keywords:
+    for keyword in plate_keys:
         info[keyword] = spPlate.header[keyword]
+    # Process plugmap header keywords
+    for keyword in plugmap_keys:
+        info[keyword] = str(plugmap[keyword])
     # Process CFrame header keywords
     cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits'%exposure))
-    for keyword in keywords:
+    for keyword in cframe_keys:
         info[keyword] = str(cframe.header[keyword])
-    # Process plugmap header keywords
-    for keyword in plugmap_keywords:
-        info[keyword] = str(plugmap[keyword])
 
     obs_ra = cframe.header['RADEG']
     obs_dec = cframe.header['DECDEG']
@@ -124,12 +124,12 @@ def main():
         print 'Must specify a plate list file to read or a specific plate and mjd pair!'
         return -1
 
-    keywords = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
+    cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     if args.keyword:
-        keywords.append(args.keyword)
+        cframe_keys.append(args.keyword)
 
-    plate_keywords = []#,'SEEING50','RMSOFF50']
-    plugmap_keywords = ['haMin']#,'cartridgeId']#,'raCen','decCen']
+    plate_keys = []#,'SEEING50','RMSOFF50']
+    plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
 
     # APO Geographical Location
     apolat = Angle('32d46m49s')
@@ -137,9 +137,9 @@ def main():
     apo = EarthLocation.from_geodetic(apolon, apolat)
 
     keys = ['plate', 'mjd', 'id']
-    keys += plate_keywords
-    keys += keywords
-    keys += plugmap_keywords
+    keys += plate_keys
+    keys += plugmap_keys
+    keys += cframe_keys
     keys += ['mean_alt', 'design_alt', 'mean_ha']
 
     print args.delim.join([key for key in keys])
@@ -173,7 +173,7 @@ def main():
 
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
-            info = examine_exposure(spPlate, plugmap, plate, mjd, exposure, keywords)
+            info = examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
 
             print args.delim.join([str(info[key]) for key in keys])
 
