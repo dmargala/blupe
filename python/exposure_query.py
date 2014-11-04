@@ -15,10 +15,9 @@ import os
 import yanny
 from astropy.io import fits
 
+from astropy import units as u
 from astropy.time import Time
 from astropy.coordinates import EarthLocation
-from astropy import units as u
-#from astropy.coordinates import SkyCoord
 from astropy.coordinates import Angle
 
 def equatorial_to_horizontal(ra, dec, lat, ha):
@@ -62,6 +61,51 @@ class Plate(object):
         self.sky = hdulist[6].data
         hdulist.close() 
 
+def examine_exposure(spPlate, plugmap, plate, mjd, exposure, keywords):
+
+    info = dict()
+    info['plate'] = plate
+    info['mjd'] = mjd
+    info['id'] = exposure
+    # Process Plate header keywords
+    for keyword in plate_keywords:
+        info[keyword] = spPlate.header[keyword]
+    # Process CFrame header keywords
+    cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits'%exposure))
+    for keyword in keywords:
+        info[keyword] = str(cframe.header[keyword])
+    # Process plugmap header keywords
+    for keyword in plugmap_keywords:
+        info[keyword] = str(plugmap[keyword])
+
+    obs_ra = cframe.header['RADEG']
+    obs_dec = cframe.header['DECDEG']
+    taibeg = cframe.header['TAI-BEG']
+    taiend = cframe.header['TAI-END']
+
+    taimid = 0.5*(taibeg+taiend)
+    dec = Angle(obs_dec, u.degree)
+    ra = Angle(obs_ra, u.degree)
+
+    time = Time(taibeg/86400.0, format='mjd', scale='tai', location=apo)
+    lst = time.sidereal_time('apparent')
+    ha = (lst - ra)
+
+    alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
+
+    info['mean_alt'] = '%.3f' % alt.to(u.degree).value
+    if ha > np.pi*u.radian:
+        ha -= 2*np.pi*u.radian
+    info['mean_ha'] = '%.4f' % ha.degree
+
+    design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
+    design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
+    design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
+    design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
+    info['design_alt'] = '%.3f' % design_alt.to(u.degree).value
+
+    return info 
+
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v','--verbose', action='store_true', help='provide more verbose output')
@@ -73,7 +117,6 @@ def main():
     parser.add_argument('-d', '--delim', type=str, default=' ', help='Table deliminator')
     parser.add_argument('--speclog', type=str, help='Speclog base dir $SPECLOG_DIR')
     parser.add_argument('-o', '--output', type=str, help='Output base directory')
-    parser.add_argument('-a','--alt', action='store_true', help='Perform exposure alt calculation')
 
     args = parser.parse_args()
 
@@ -96,21 +139,28 @@ def main():
     keys = ['plate', 'mjd', 'id']
     keys += plate_keywords
     keys += keywords
-    if args.alt:
-        keys += ['mean_alt', 'design_alt', 'mean_ha']
     keys += plugmap_keywords
+    keys += ['mean_alt', 'design_alt', 'mean_ha']
 
     print args.delim.join([key for key in keys])
 
-    def examine_exposures(datadir, speclog, plate, mjd, keywords, outputdir):
-        plate_name = os.path.join(datadir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
+    plate_mjd_list = []
+    if args.input:
+        with open(args.input) as platelist:
+            for line in platelist:
+                plate_mjd_list.append(line.strip().split())
+    else:
+        plate_mjd_list.append((args.plate, args.mjd))
+    
+    for plate, mjd in plate_mjd_list: 
+        plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
         spPlate = Plate(plate_name)
 
-        plan_name = os.path.join(datadir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
+        plan_name = os.path.join(args.bossdir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
         plan = yanny.yanny(plan_name)
         unique_mapnames = set(zip(plan['SPEXP']['mjd'], plan['SPEXP']['mapname']))
         (mapmjd, mapname) = unique_mapnames.pop()
-        plugmap_name = os.path.join(speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
+        plugmap_name = os.path.join(args.speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
         plugmap = yanny.yanny(plugmap_name)
 
         # Construct list of exposure IDs
@@ -123,59 +173,9 @@ def main():
 
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
-            info = dict()
-            info['plate'] = plate
-            info['mjd'] = mjd
-            info['id'] = exposure
-            # Process Plate header keywords
-            for keyword in plate_keywords:
-                info[keyword] = spPlate.header[keyword]
-            # Process CFrame header keywords
-            cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits'%exposure))
-            for keyword in keywords:
-                info[keyword] = str(cframe.header[keyword])
-            # Process plugmap header keywords
-            for keyword in plugmap_keywords:
-                info[keyword] = str(plugmap[keyword])
-            # Do fancy stuff
-            if args.alt:
-                obs_ra = cframe.header['RADEG']
-                obs_dec = cframe.header['DECDEG']
-                taibeg = cframe.header['TAI-BEG']
-                taiend = cframe.header['TAI-END']
-
-                taimid = 0.5*(taibeg+taiend)
-                dec = Angle(obs_dec, u.degree)
-                ra = Angle(obs_ra, u.degree)
-
-                time = Time(taibeg/86400.0, format='mjd', scale='tai', location=apo)
-                lst = time.sidereal_time('apparent')
-                ha = (lst - ra)
+            info = examine_exposures(spPlate, plugmap, plate, mjd, exposure, keywords=keywords)
             
-                alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
-
-                info['mean_alt'] = '%.3f' % alt.to(u.degree).value
-                if ha > np.pi*u.radian:
-                    ha -= 2*np.pi*u.radian
-                info['mean_ha'] = '%.4f' % ha.degree
-
-                design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
-                design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
-                design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
-                design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-                info['design_alt'] = '%.3f' % design_alt.to(u.degree).value
-
             print args.delim.join([str(info[key]) for key in keys])
-
-    if args.input:
-        with open(args.input) as platelist:
-            for line in platelist:
-                (plate, mjd) = line.strip().split()
-                examine_exposures(datadir=args.bossdir, speclog=args.speclog, 
-                    plate=plate, mjd=mjd, keywords=keywords, outputdir=args.output)
-    else:
-        examine_exposures(datadir=args.bossdir, speclog=args.speclog, 
-            plate=args.plate, mjd=args.mjd, keywords=keywords, outputdir=args.output)
 
 if __name__ == '__main__':
     main()
