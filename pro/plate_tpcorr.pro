@@ -20,7 +20,7 @@
 ; REVISION HISTORY:
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
-pro plate_tpcorr, plateid, mjd, mapmjd, ha, fwhm, outfilename
+pro plate_tpcorr, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
@@ -29,10 +29,10 @@ pointing=1L
 offset=0L
 
 ; path to plPlugMap file
-speclog_path = '/home/boss/products/NULL/speclog/trunk/'
-plugmapname = speclog_path+string(mapmjd)+'/plPlugMapM-'+string(plateid)+'-'+string(mapmjd)+'-01.par'
-plugmap = yanny_readone(plugmapname, hdr=phdr, /anon)
-plugfibers= plugmap.fiberid
+speclog_path= '/home/boss/products/NULL/speclog/trunk/'
+plugmapname= speclog_path+strtrim(mapmjd,2)+'/plPlugMapM-'+strtrim(plateid,2)+'-'+strtrim(mapmjd,2)+'-01.par'
+splog, plugmapname
+plugmap= yanny_readone(plugmapname, hdr=phdr, /anon)
 
 ; Set path to directory for the specified plate number
 platedir= plate_dir(plateid)
@@ -74,7 +74,7 @@ lambda= full[igood].lambda_eff ;; e.g., 5400 for LRGs, 4000 for QSOs, 16600 for 
 xforig= full[igood].xfocal
 yforig= full[igood].yfocal
 
-fiberids = plugfibers[igood]
+fiberids = plugmap[igood].fiberid
 
 ; Calculate xfocal and yfocal for this pointing (should be similar 
 ; to xforig/yforig up to round-off)
