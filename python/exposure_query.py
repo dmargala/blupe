@@ -135,11 +135,7 @@ def main():
     else:
         plate_mjd_list.append((args.plate, args.mjd))
 
-    mean_psf_fwhm = []
-    mean_ha = []
-    mean_alt = []
-    mapmjd_list = []
-    mapname_list = []
+    plate_info_list = []
     
     for plate, mjd in plate_mjd_list: 
         plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -185,6 +181,7 @@ def main():
         psf_fwhm_list = []
         ha_list = []
         alt_list = []
+        rmsoff_list = []
 
         if args.verbose:
             print args.delim.join([str(plate_info[key]) for key in (new_plate_keys + plate_keys + plugmap_keys)])
@@ -203,18 +200,25 @@ def main():
             psf_fwhm_list.append(exposure_info['SEEING50'])
             ha_list.append(exposure_info['mean_ha'])
             alt_list.append(exposure_info['mean_alt'])
+            rmsoff_list.append(exposure_info['RMSOFF50'])
 
         if args.verbose:
             print np.mean(psf_fwhm_list), np.mean(ha_list), np.mean(alt_list)
 
-        mean_psf_fwhm.append(np.mean(psf_fwhm_list))
-        mean_ha.append(np.mean(ha_list))
-        mean_alt.append(np.mean(alt_list))
+        plate_info['mean_psf_fwhm'] = np.mean(psf_fwhm_list)
+        plate_info['mean_ha'] = np.mean(ha_list)
+        plate_info['mean_alt'] = np.mean(alt_list)
+        plate_info['mean_rmsoff'] = np.mean(rmsoff_list)
+
+        plate_info_list.append(plate_info)
 
     if args.output:
+        outkeys = ['plate', 'mjd', 'mapmjd', 'mapname', 'mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff', 'design_alt']
+        outfmt = '%s %s %s %s %.4f %.4f %.4f %.8f %.4f\n'
         with open(args.output, 'w') as output:
-            for i, (plate, mjd) in enumerate(plate_mjd_list):
-                output.write('%s %s %s %s %.4f %.4f %.4f\n' % (plate, mjd, mapmjd_list[i], mapname_list[i], mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
+            for plate_info in plate_info_list:
+                values = [plate_info[key] for key in outkeys]
+                output.write(outfmt % values)
 
 if __name__ == '__main__':
     main()
