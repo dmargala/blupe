@@ -152,6 +152,7 @@ def main():
 
     mean_psf_fwhm = []
     mean_ha = []
+    mean_alt = []
     
     for plate, mjd in plate_mjd_list: 
         plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -175,6 +176,7 @@ def main():
         # Iterate over exposures and gather information of interest
         psf_fwhm_list = []
         ha_list = []
+        alt_list = []
         for exposure in exposures:
             cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
             info = examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
@@ -182,14 +184,16 @@ def main():
 
             psf_fwhm_list.append(info['SEEING50'])
             ha_list.append(info['mean_ha'])
+            alt_list.append(inf['mean_alt'])
 
         mean_psf_fwhm.append(np.mean(psf_fwhm_list))
         mean_ha.append(np.mean(ha_list))
+        mean_alt.append(np.mean(alt_list))
 
     if args.output:
         with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
-                output.write('%s %s %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i]))
+                output.write('%s %s %.4f %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i]), mean_alt[i])
 
 
 if __name__ == '__main__':
