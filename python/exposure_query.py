@@ -109,7 +109,7 @@ def main():
         print 'Must specify a plate list file to read or a specific plate and mjd pair!'
         return -1
 
-    plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT',]
+    plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
     cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     new_exp_keys = ['id', 'mean_alt', 'mean_ha']
