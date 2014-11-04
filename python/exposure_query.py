@@ -20,6 +20,11 @@ from astropy.time import Time
 from astropy.coordinates import EarthLocation
 from astropy.coordinates import Angle
 
+# APO Geographical Location
+apolat = Angle('32d46m49s')
+apolon = Angle('-105d49m13s')
+apo = EarthLocation.from_geodetic(apolon, apolat)
+
 def equatorial_to_horizontal(ra, dec, lat, ha):
     sin_alt = np.sin(dec)*np.sin(lat) + np.cos(dec)*np.cos(lat)*np.cos(ha)
     alt = np.arcsin(sin_alt)
@@ -128,11 +133,6 @@ def main():
 
     plate_keys = []#,'SEEING50','RMSOFF50']
     plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
-
-    # APO Geographical Location
-    apolat = Angle('32d46m49s')
-    apolon = Angle('-105d49m13s')
-    apo = EarthLocation.from_geodetic(apolon, apolat)
 
     keys = ['plate', 'mjd', 'id']
     keys += plate_keys
