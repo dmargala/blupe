@@ -76,10 +76,10 @@ def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys,
         info[keyword] = spPlate.header[keyword]
     # Process plugmap header keywords
     for keyword in plugmap_keys:
-        info[keyword] = str(plugmap[keyword])
+        info[keyword] = plugmap[keyword]
     # Process CFrame header keywords
     for keyword in cframe_keys:
-        info[keyword] = str(cframe.header[keyword])
+        info[keyword] = cframe.header[keyword]
 
     obs_ra = cframe.header['RADEG']
     obs_dec = cframe.header['DECDEG']
@@ -96,16 +96,16 @@ def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys,
 
     alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
 
-    info['mean_alt'] = '%.3f' % alt.to(u.degree).value
+    info['mean_alt'] = alt.to(u.degree).value
     if ha > np.pi*u.radian:
         ha -= 2*np.pi*u.radian
-    info['mean_ha'] = '%.4f' % ha.degree
+    info['mean_ha'] = ha.to(u.degree).value
 
     design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
     design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
     design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
     design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-    info['design_alt'] = '%.3f' % design_alt.to(u.degree).value
+    info['design_alt'] = design_alt.to(u.degree).value
 
     return info 
 
