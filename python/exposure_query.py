@@ -112,7 +112,8 @@ def main():
     plate_keys = []#,'SEEING50','RMSOFF50']
     plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
     cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
-    alt_keys = ['mean_alt', 'design_alt', 'mean_ha']
+    new_exp_keys = ['id', 'mean_alt', 'mean_ha']
+    new_plate_keys = ['plate', 'mjd', 'design_alt']
 
     plate_mjd_list = []
     if args.input:
@@ -167,7 +168,7 @@ def main():
         ha_list = []
         alt_list = []
 
-        print args.delim.join([str(plate_info[key]) for key in (['plate', 'mjd']+plate_keys+plugmap_keys)])
+        print args.delim.join([str(plate_info[key]) for key in (new_plate_keys + plate_keys + plugmap_keys)])
 
         for exposure in exposures:
             exposure_info = dict()
@@ -177,7 +178,7 @@ def main():
 
             examine_exposure(exposure_info, cframe, cframe_keys)
 
-            print '\t', args.delim.join([str(exposure_info[key]) for key in (cframe_keys+alt_keys)])
+            print '\t', args.delim.join([str(exposure_info[key]) for key in (new_exp_keys + cframe_keys)])
 
             psf_fwhm_list.append(exposure_info['SEEING50'])
             ha_list.append(exposure_info['mean_ha'])
