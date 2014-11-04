@@ -177,7 +177,7 @@ def main():
 
             examine_exposure(exposure_info, cframe, cframe_keys)
 
-            print '\t', args.delim.join([str(exposure_info[key]) for key in ([cframe_keys+alt_keys)])
+            print '\t', args.delim.join([str(exposure_info[key]) for key in (cframe_keys+alt_keys)])
 
             psf_fwhm_list.append(exposure_info['SEEING50'])
             ha_list.append(exposure_info['mean_ha'])
