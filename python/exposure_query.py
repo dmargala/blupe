@@ -61,8 +61,7 @@ class Plate(object):
         self.sky = hdulist[6].data
         hdulist.close() 
 
-def examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys):
-
+def examine_exposure(spPlate, plugmap, cframe, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys):
     info = dict()
     info['plate'] = plate
     info['mjd'] = mjd
@@ -74,7 +73,6 @@ def examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap
     for keyword in plugmap_keys:
         info[keyword] = str(plugmap[keyword])
     # Process CFrame header keywords
-    cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits'%exposure))
     for keyword in cframe_keys:
         info[keyword] = str(cframe.header[keyword])
 
@@ -173,8 +171,8 @@ def main():
 
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
+            cframe = CFrame(os.path.join(datadir, plate, 'spCFrame-%s.fits' % exposure))
             info = examine_exposure(spPlate, plugmap, plate, mjd, exposure, plate_keys, plugmap_keys, cframe_keys)
-
             print args.delim.join([str(info[key]) for key in keys])
 
 if __name__ == '__main__':
