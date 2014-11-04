@@ -4,6 +4,8 @@
 #
 # usage: 
 
+# ./python/exposure_query.py --verbose --input work/blue-plate-mjd-list.txt --output work/plate-mjd-ha-psf.txt
+
 # Import libraries
 import argparse
 import math
@@ -60,7 +62,6 @@ def examine_exposure(info, cframe, cframe_keys):
         ha -= 2*np.pi*u.radian
     info['mean_ha'] = ha.to(u.degree).value
 
-
 class Fluxcalib(object):
     def __init__(self, name):
         hdulist = fits.open(name)
@@ -94,15 +95,22 @@ class Plate(object):
 
 def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-v','--verbose', action='store_true', help='provide more verbose output')
-    parser.add_argument('-p', '--plate', type=str, help='Plate')
-    parser.add_argument('-m', '--mjd', type=str, help='MJD')
-    parser.add_argument('--bossdir', type=str, help='Input default boss reduction $BOSS_SPECTRO_REDUX/$RUN2D')
-    parser.add_argument('-i', '--input', type=str, help='Input plate list file to read')
-    parser.add_argument('-d', '--delim', type=str, default=' ', help='Table deliminator')
-    parser.add_argument('--speclog', type=str, help='Speclog base dir $SPECLOG_DIR')
-    parser.add_argument('-o', '--output', type=str, default='', help='Output prefix')
-
+    parser.add_argument('-v','--verbose', action='store_true',
+        help='provide more verbose output')
+    parser.add_argument('-p', '--plate', type=str, default=None,
+        help='specify plate number for single plate-mjd query')
+    parser.add_argument('-m', '--mjd', type=str, default=None,
+        help='specify mjd for single plate-mjd query')
+    parser.add_argument('-i', '--input', type=str, default=None
+        help='specify file with plate,mjd entries to query')
+    parser.add_argument('--bossdir', type=str, default='/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0', 
+        help='path to 2D reduction dir ($BOSS_SPECTRO_REDUX/$RUN2D)')
+    parser.add_argument('--speclog', type=str, default='/home/boss/products/NULL/speclog/trunk',
+        help='path to speclog base dir ($SPECLOG_DIR)')
+    parser.add_argument('-d', '--delim', type=str, default=' ',
+        help='output token deliminator (useful for making tables)')
+    parser.add_argument('-o', '--output', type=str, default=None,
+        help='output filename')
     args = parser.parse_args()
 
     if not (args.input or (args.plate and args.mjd)):
@@ -110,7 +118,7 @@ def main():
         return -1
 
     plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
-    plugmap_keys = ['haMin']#,'cartridgeId']#,'raCen','decCen']
+    plugmap_keys = ['haMin']
     cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     new_exp_keys = ['id', 'mean_alt', 'mean_ha']
     new_plate_keys = ['plate', 'mjd', 'design_alt']
@@ -168,7 +176,8 @@ def main():
         ha_list = []
         alt_list = []
 
-        print args.delim.join([str(plate_info[key]) for key in (new_plate_keys + plate_keys + plugmap_keys)])
+        if args.verbose:
+            print args.delim.join([str(plate_info[key]) for key in (new_plate_keys + plate_keys + plugmap_keys)])
 
         for exposure in exposures:
             exposure_info = dict()
@@ -178,13 +187,15 @@ def main():
 
             examine_exposure(exposure_info, cframe, cframe_keys)
 
-            print '\t', args.delim.join([str(exposure_info[key]) for key in (new_exp_keys + cframe_keys)])
+            if args.verbose:
+                print '\t', args.delim.join([str(exposure_info[key]) for key in (new_exp_keys + cframe_keys)])
 
             psf_fwhm_list.append(exposure_info['SEEING50'])
             ha_list.append(exposure_info['mean_ha'])
             alt_list.append(exposure_info['mean_alt'])
 
-        print np.mean(psf_fwhm_list), np.mean(ha_list), np.mean(alt_list)
+        if args.verbose:
+            print np.mean(psf_fwhm_list), np.mean(ha_list), np.mean(alt_list)
 
         mean_psf_fwhm.append(np.mean(psf_fwhm_list))
         mean_ha.append(np.mean(ha_list))
