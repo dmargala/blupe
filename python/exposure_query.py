@@ -139,6 +139,7 @@ def main():
     mean_ha = []
     mean_alt = []
     mapmjd_list = []
+    mapname_list = []
     
     for plate, mjd in plate_mjd_list: 
         plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -152,6 +153,7 @@ def main():
         plugmap = yanny.yanny(plugmap_name)
 
         mapmjd_list.append(mapmjd)
+        mapname_list.append(mapname)
 
         # Construct list of exposure IDs
         exposures = list()
@@ -212,7 +214,7 @@ def main():
     if args.output:
         with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
-                output.write('%s %s %s %.4f %.4f %.4f\n' % (plate, mjd, mapmjd_list[i], mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
+                output.write('%s %s %s %s %.4f %.4f %.4f\n' % (plate, mjd, mapmjd_list[i], mapname_list[i], mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
 
 if __name__ == '__main__':
     main()
