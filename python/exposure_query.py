@@ -55,12 +55,15 @@ def examine_exposure(info, cframe, cframe_keys):
     lst = time.sidereal_time('apparent')
     ha = (lst - ra)
 
-    alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
-
-    info['mean_alt'] = alt.to(u.degree).value
     if ha > np.pi*u.radian:
         ha -= 2*np.pi*u.radian
+    elif ha < -np.pi*u.radian:
+        ha += 2*np.pi*u.radian
     info['mean_ha'] = ha.to(u.degree).value
+
+    alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
+    info['mean_alt'] = alt.to(u.degree).value
+
 
 class Fluxcalib(object):
     def __init__(self, name):
