@@ -173,8 +173,8 @@ def main():
 
         # Iterate over exposures and gather information of interest
         for exposure in exposures:
-            info = examine_exposures(spPlate, plugmap, plate, mjd, exposure, keywords=keywords)
-            
+            info = examine_exposure(spPlate, plugmap, plate, mjd, exposure, keywords)
+
             print args.delim.join([str(info[key]) for key in keys])
 
 if __name__ == '__main__':
