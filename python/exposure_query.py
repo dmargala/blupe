@@ -148,7 +148,7 @@ def main():
                 dec = Angle(obs_dec, u.degree)
                 ra = Angle(obs_ra, u.degree)
 
-                time = Time(taimid/86400.0, format='mjd', scale='tai', location=apo)
+                time = Time(taibeg/86400.0, format='mjd', scale='tai', location=apo)
                 lst = time.sidereal_time('apparent')
                 ha = (lst - ra)
             
