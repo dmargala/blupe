@@ -193,7 +193,7 @@ def main():
     if args.output:
         with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
-                output.write('%s %s %.4f %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i]), mean_alt[i])
+                output.write('%s %s %.4f %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
 
 
 if __name__ == '__main__':
