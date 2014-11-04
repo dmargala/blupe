@@ -216,7 +216,7 @@ def main():
         with open(args.output, 'w') as output:
             for plate_info in plate_info_list:
                 values = [plate_info[key] for key in outkeys]
-                output.write(outfmt % values)
+                output.write(outfmt % tuple(values))
 
 if __name__ == '__main__':
     main()
