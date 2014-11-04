@@ -20,7 +20,7 @@
 ; REVISION HISTORY:
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
-pro plate_tpcorr, plateid, ha, fwhm, output
+pro plate_tpcorr, plateid, ha, fwhm, outfilename
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
@@ -144,8 +144,6 @@ endfor
 
 
 ; open output file
-outdir='~/guiding/tpcorr'
-outfilename= outdir+'/tpcorr-'+output+'.txt'
 splog, 'Saving throughput corrections to file: '+outfilename
 
 openw, 1, outfilename
