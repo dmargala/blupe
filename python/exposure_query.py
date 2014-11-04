@@ -148,9 +148,6 @@ def main():
         plugmap_name = os.path.join(args.speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
         plugmap = yanny.yanny(plugmap_name)
 
-        mapmjd_list.append(mapmjd)
-        mapname_list.append(mapname)
-
         # Construct list of exposure IDs
         exposures = list()
         nexp = spPlate.header['NEXP']
@@ -163,6 +160,7 @@ def main():
         plate_info['plate'] = plate
         plate_info['mjd'] = mjd
         plate_info['mapmjd'] = mapmjd
+        plate_info['mapname'] = mapname
         plate_info['exposures'] = exposures
         # Process Plate header keywords
         for keyword in plate_keys:
