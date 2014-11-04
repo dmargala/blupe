@@ -178,11 +178,11 @@ def main():
             exposure_info = dict()
             exposure_info['id'] = exposure
 
-            cframe = CFrame(os.path.join(args.bossdir, plate, 'spCFrame-%s.fits' % exposure))
+            cframe = CFrame(os.path.join(args.bossdir, str(plate), 'spCFrame-%s.fits' % exposure))
 
             examine_exposure(exposure_info, cframe, cframe_keys)
 
-            combined_info = plate_info + exposure_info
+            combined_info = dict(plate_info.items() + exposure_info.items())
 
             print args.delim.join([str(combined_info[key]) for key in keys])
 
