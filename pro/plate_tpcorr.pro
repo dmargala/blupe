@@ -29,7 +29,8 @@ pointing=1L
 offset=0L
 
 ; path to plPlugMap file
-plugmapname = speclog+'/'+mapmjd+'/plPlugMapM-'+plateid+'-'+mapmjd+'-01.par'
+speclog_path = '/home/boss/products/NULL/speclog/trunk/'
+plugmapname = speclog_path+mapmjd+'/plPlugMapM-'+plateid+'-'+mapmjd+'-01.par'
 plugmap = yanny_readone(plugmapname)
 
 ; Set path to directory for the specified plate number
