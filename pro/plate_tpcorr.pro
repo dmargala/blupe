@@ -31,7 +31,7 @@ offset=0L
 ; path to plPlugMap file
 speclog_path = '/home/boss/products/NULL/speclog/trunk/'
 plugmapname = speclog_path+string(mapmjd)+'/plPlugMapM-'+string(plateid)+'-'+string(mapmjd)+'-01.par'
-plugmap = yanny_readone(plugmapname)
+plugmap = yanny_readone(plugmapname, hdr=phdr, /anon)
 plugfibers= plugmap.fiberid
 
 ; Set path to directory for the specified plate number
