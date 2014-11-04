@@ -184,7 +184,7 @@ def main():
 
             psf_fwhm_list.append(info['SEEING50'])
             ha_list.append(info['mean_ha'])
-            alt_list.append(inf['mean_alt'])
+            alt_list.append(info['mean_alt'])
 
         mean_psf_fwhm.append(np.mean(psf_fwhm_list))
         mean_ha.append(np.mean(ha_list))
