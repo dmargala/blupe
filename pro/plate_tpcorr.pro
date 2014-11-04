@@ -32,6 +32,7 @@ offset=0L
 speclog_path = '/home/boss/products/NULL/speclog/trunk/'
 plugmapname = speclog_path+string(mapmjd)+'/plPlugMapM-'+string(plateid)+'-'+string(mapmjd)+'-01.par'
 plugmap = yanny_readone(plugmapname)
+plugfibers= plugmap.fiberid
 
 ; Set path to directory for the specified plate number
 platedir= plate_dir(plateid)
@@ -73,7 +74,7 @@ lambda= full[igood].lambda_eff ;; e.g., 5400 for LRGs, 4000 for QSOs, 16600 for 
 xforig= full[igood].xfocal
 yforig= full[igood].yfocal
 
-fiberids = plugmap[igood].fiberid
+fiberids = plugfibers[igood]
 
 ; Calculate xfocal and yfocal for this pointing (should be similar 
 ; to xforig/yforig up to round-off)
