@@ -122,9 +122,10 @@ def main():
 
     plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     plugmap_keys = ['haMin']
+    new_plate_keys = ['plate', 'mjd', 'mapmjd', 'design_alt']
+
     cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     new_exp_keys = ['id', 'mean_alt', 'mean_ha']
-    new_plate_keys = ['plate', 'mjd', 'design_alt']
 
     plate_mjd_list = []
     if args.input:
@@ -137,6 +138,7 @@ def main():
     mean_psf_fwhm = []
     mean_ha = []
     mean_alt = []
+    mapmjd_list = []
     
     for plate, mjd in plate_mjd_list: 
         plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
@@ -149,6 +151,8 @@ def main():
         plugmap_name = os.path.join(args.speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
         plugmap = yanny.yanny(plugmap_name)
 
+        mapmjd_list.append(mapmjd)
+
         # Construct list of exposure IDs
         exposures = list()
         nexp = spPlate.header['NEXP']
@@ -160,6 +164,7 @@ def main():
         plate_info = {}
         plate_info['plate'] = plate
         plate_info['mjd'] = mjd
+        plate_info['mapmjd'] = mapmjd
         plate_info['exposures'] = exposures
         # Process Plate header keywords
         for keyword in plate_keys:
@@ -207,7 +212,7 @@ def main():
     if args.output:
         with open(args.output, 'w') as output:
             for i, (plate, mjd) in enumerate(plate_mjd_list):
-                output.write('%s %s %.4f %.4f %.4f\n' % (plate, mjd, mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
+                output.write('%s %s %s %.4f %.4f %.4f\n' % (plate, mjd, mapmjd_list[i], mean_ha[i], mean_psf_fwhm[i], mean_alt[i]))
 
 if __name__ == '__main__':
     main()
