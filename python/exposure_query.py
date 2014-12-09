@@ -9,6 +9,7 @@
 # Import libraries
 import argparse
 import math
+import json
 
 import numpy as np
 
@@ -184,58 +185,41 @@ def main():
         print 'Must specify a plate id and observation mjd!'
         return -1
 
-    plate = args.plate
-    mjd = args.mjd
-    outkeys = ['plate', 'mjd']
-    outfmts = ['%s', '%s']
-
-    if args.outdir:
-        expinfo_filename = os.path.join(args.outdir, 'expinfo-%s-%s.txt' % (plate, mjd))
-        expinfo_file = open(expinfo_filename, 'w')
-        combined_filename = os.path.join(args.outfir, 'combined-%s-%s.txt' % (plate, mjd))
-        combined_file = open(combined_filename, 'w')
-
-    plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
-    plugmap_keys = ['haMin']
-
-    exp_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
-    new_exp_keys = ['id', 'mean_alt', 'mean_ha']
-    
     plate_info = {}
-    plate_info['plate'] = plate
-    plate_info['mjd'] = mjd
+    plate_info['plate'] = args.plate
+    plate_info['mjd'] = args.mjd
     plate_info['bossdir'] = args.bossdir
     plate_info['speclog'] = args.speclog
 
+    summary_keys = ['plate', 'mjd']
+    summary_fmts = ['%s', '%s']
+    plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     add_plate_info(plate_info, plate_keys)
 
+    plugmap_keys = ['haMin']
     if not args.skip_plugmap:
         add_plugmap_info(plate_info, plugmap_keys)
-        outkeys += ['mapmjd', 'mapname', 'design_alt']
-        outfmts += ['%s', '%s', '%.4f']
+        summary_keys += ['mapmjd', 'mapname', 'design_alt']
+        summary_fmts += ['%s', '%s', '%.4f']
 
+    exp_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     if not args.skip_exp:
         add_exp_info(plate_info, exp_keys)
+        summary_keys += ['mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff']
+        summary_fmts += ['%.4f', '%.4f', '%.4f', '%.8f']
 
-        for exposure in plate_info['exposures']:
-            exposure_info = plate_info[exposure]
-            outstring = args.delim.join([str(exposure_info[key]) for key in (['mean_alt', 'mean_ha'] + exp_keys)])
-            if args.outdir:
-                expinfo_file.write(outstring)
-                expinfo_file.write('\n')
-            else:
-                print outstring
-
-        outkeys += ['mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff']
-        outfmts += ['%.4f', '%.4f', '%.4f', '%.8f']
-
-    outstring = args.delim.join([fmt % plate_info[key] for key,fmt in zip(outkeys, outfmts)])
+    summary = args.delim.join([fmt % plate_info[key] for key,fmt in zip(summary_keys, summary_fmts)])
     if args.outdir:
-        combined_file.write(outstring)
-        combined_file.write('\n')
+        summary_filename = os.path.join(args.outdir, 'expinfo-summary-%s-%s.txt' % (plate_info['plate'], plate_info['mjd']))
+        with open(summary_filename, 'w') as outfile:
+            outfile.write(summary)
+            outfile.write('\n')
+        json_filename = os.path.join(args.outdir, 'expinfo-%s-%s.json' % (plate_info['plate'], plate_info['mjd']))
+        with open(json_filename, 'w') as outfile:
+            json.dump(plate_info, outfile, sort_keys=True, indent=2)
     else:
-        print outstring
-        print plate_info
+        print summary
+        print json.dumps(plate_info, sort_keys=True, indent=2)
 
 if __name__ == '__main__':
     main()
