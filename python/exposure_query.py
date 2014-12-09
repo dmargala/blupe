@@ -33,6 +33,7 @@ def equatorial_to_horizontal(ra, dec, lat, ha):
     if np.sin(ha) < 0:
         az = np.arccos(cos_az)
     else:
+        print cos_az
         az = 2*np.pi*u.radian - np.arccos(cos_az)
         if az == np.nan:
             print ra, dec, lat, ha, sin_alt, alt, cos_az
