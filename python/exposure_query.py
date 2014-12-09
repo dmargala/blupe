@@ -55,6 +55,8 @@ def examine_exposure(info, cframe, cframe_keys):
     dec = Angle(obs_dec, u.degree)
     ra = Angle(obs_ra, u.degree)
 
+    print taimid
+
     time = Time(taimid/86400.0, format='mjd', scale='tai', location=apo)
     lst = time.sidereal_time('apparent')
     ha = (lst - ra)
@@ -82,6 +84,7 @@ def add_exp_info(plate_info, exp_keys):
         exposure_info = dict()
 
         cframe = CFrame(os.path.join(plate_info['bossdir'], str(plate), 'spCFrame-%s.fits' % exposure))
+
         examine_exposure(exposure_info, cframe, exp_keys)
 
         plate_info[exposure] = exposure_info
