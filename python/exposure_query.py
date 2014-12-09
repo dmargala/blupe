@@ -34,6 +34,8 @@ def equatorial_to_horizontal(ra, dec, lat, ha):
         az = np.arccos(cos_az)
     else:
         az = 2*np.pi*u.radian - np.arccos(cos_az)
+        if az == np.nan:
+            print ra, dec, lat, ha, sin_alt, alt, cos_az
     return alt, az
 
 def examine_exposure(info, cframe, cframe_keys):
