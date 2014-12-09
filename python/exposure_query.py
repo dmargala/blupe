@@ -9,12 +9,10 @@
 # Import libraries
 import argparse
 import math
-from datetime import datetime
 
 import numpy as np
 
 import os
-import yanny
 from astropy.io import fits
 
 from astropy import units as u
@@ -64,13 +62,77 @@ def examine_exposure(info, cframe, cframe_keys):
     alt, az = equatorial_to_horizontal(ra, dec, apolat, ha)
     info['mean_alt'] = alt.to(u.degree).value
 
+def add_exp_info(plate_info, exp_keys):
+    plate = plate_info['plate']
 
-class Fluxcalib(object):
-    def __init__(self, name):
-        hdulist = fits.open(name)
-        self.header = hdulist[0].header
-        self.data = hdulist[0].data
-        hdulist.close()
+    # Iterate over exposures and gather information of interest
+    psf_fwhm_list = []
+    ha_list = []
+    alt_list = []
+    rmsoff_list = []
+
+    for exposure in plate_info['exposures']:
+        exposure_info = dict()
+
+        cframe = CFrame(os.path.join(plate_info['bossdir'], str(plate), 'spCFrame-%s.fits' % exposure))
+        examine_exposure(exposure_info, cframe, exp_keys)
+
+        plate_info[exposure] = exposure_info
+
+        psf_fwhm_list.append(exposure_info['SEEING50'])
+        ha_list.append(exposure_info['mean_ha'])
+        alt_list.append(exposure_info['mean_alt'])
+        rmsoff_list.append(exposure_info['RMSOFF50'])
+
+    plate_info['mean_psf_fwhm'] = np.mean(psf_fwhm_list)
+    plate_info['mean_ha'] = np.mean(ha_list)
+    plate_info['mean_alt'] = np.mean(alt_list)
+    plate_info['mean_rmsoff'] = np.mean(rmsoff_list)
+
+def add_plate_info(plate_info, plate_keys):
+    plate = plate_info['plate']
+    mjd = plate_info['mjd']
+    plate_name = os.path.join(plate_info['bossdir'], str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
+    spPlate = Plate(plate_name)
+    # Construct list of exposure IDs
+    exposures = list()
+    nexp = spPlate.header['NEXP']
+    if (nexp % 4) != 0:
+        print 'Warning, unexpected number of exposures...'
+    for i in range(nexp/4):
+        exposures.append('-'.join(spPlate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
+    plate_info['exposures'] = exposures
+
+    # Process Plate header keywords
+    for keyword in plate_keys:
+        plate_info[keyword] = spPlate.header[keyword]
+
+def add_plugmap_info(plate_info, plugmap_keys):
+    import yanny
+    plate = plate_info['plate']
+    mjd = plate_info['mjd']
+
+    plan_name = os.path.join(plate_info['bossdir'], str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
+    plan = yanny.yanny(plan_name)
+
+    # look up plugmap filename
+    unique_mapnames = set(zip(plan['SPEXP']['mjd'], plan['SPEXP']['mapname']))
+    (mapmjd, mapname) = unique_mapnames.pop()
+    plugmap_name = os.path.join(plate_info['speclog'], str(mapmjd), 'plPlugMapM-%s.par' % mapname)
+    plugmap = yanny.yanny(plugmap_name)
+
+    plate_info['mapmjd'] = mapmjd
+    plate_info['mapname'] = mapname
+
+    # Process plugmap header keywords
+    for keyword in plugmap_keys:
+        plate_info[keyword] = plugmap[keyword]
+
+    design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
+    design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
+    design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
+    design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
+    plate_info['design_alt'] = design_alt.to(u.degree).value
     
 class CFrame(object):
     def __init__(self, name):
@@ -101,122 +163,79 @@ def main():
     parser.add_argument('-v','--verbose', action='store_true',
         help='provide more verbose output')
     parser.add_argument('-p', '--plate', type=str, default=None,
-        help='specify plate number for single plate-mjd query')
+        help='specify plate id')
     parser.add_argument('-m', '--mjd', type=str, default=None,
-        help='specify mjd for single plate-mjd query')
-    parser.add_argument('-i', '--input', type=str, default=None,
-        help='specify file with plate,mjd entries to query')
+        help='specify observation mjd')
     parser.add_argument('--bossdir', type=str, default='/clusterfs/riemann/raid008/bosswork/boss/spectro/redux/v5_7_0', 
         help='path to 2D reduction dir ($BOSS_SPECTRO_REDUX/$RUN2D)')
     parser.add_argument('--speclog', type=str, default='/home/boss/products/NULL/speclog/trunk',
         help='path to speclog base dir ($SPECLOG_DIR)')
     parser.add_argument('-d', '--delim', type=str, default=' ',
         help='output token deliminator (useful for making tables)')
-    parser.add_argument('-o', '--output', type=str, default=None,
-        help='output filename')
+    parser.add_argument('-o', '--outdir', type=str, default=None,
+        help='output directory')
+    parser.add_argument('--skip-exp', action='store_true',
+        help='skip spCFrame reading')
+    parser.add_argument('--skip-plugmap', action='store_true',
+        help='skip plugMapM reading')
     args = parser.parse_args()
 
-    if not (args.input or (args.plate and args.mjd)):
-        print 'Must specify a plate list file to read or a specific plate and mjd pair!'
+    if not (args.plate and args.mjd):
+        print 'Must specify a plate id and observation mjd!'
         return -1
+
+    plate = args.plate
+    mjd = args.mjd
+    outkeys = ['plate', 'mjd']
+    outfmts = ['%s', '%s']
+
+    if args.outdir:
+        expinfo_filename = os.path.join(args.outdir, 'expinfo-%s-%s.txt' % (plate, mjd))
+        expinfo_file = open(expinfo_filename, 'w')
+        combined_filename = os.path.join(args.outfir, 'combined-%s-%s.txt' % (plate, mjd))
+        combined_file = open(combined_filename, 'w')
 
     plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     plugmap_keys = ['haMin']
-    new_plate_keys = ['plate', 'mjd', 'mapmjd', 'design_alt']
 
-    cframe_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
+    exp_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     new_exp_keys = ['id', 'mean_alt', 'mean_ha']
-
-    plate_mjd_list = []
-    if args.input:
-        with open(args.input) as platelist:
-            for line in platelist:
-                plate_mjd_list.append(line.strip().split())
-    else:
-        plate_mjd_list.append((args.plate, args.mjd))
-
-    plate_info_list = []
     
-    for plate, mjd in plate_mjd_list: 
-        plate_name = os.path.join(args.bossdir, str(plate), 'spPlate-%s-%s.fits' % (plate, mjd))
-        spPlate = Plate(plate_name)
+    plate_info = {}
+    plate_info['plate'] = plate
+    plate_info['mjd'] = mjd
+    plate_info['bossdir'] = args.bossdir
+    plate_info['speclog'] = args.speclog
 
-        plan_name = os.path.join(args.bossdir, str(plate), 'spPlancomb-%s-%s.par' % (plate, mjd))
-        plan = yanny.yanny(plan_name)
-        unique_mapnames = set(zip(plan['SPEXP']['mjd'], plan['SPEXP']['mapname']))
-        (mapmjd, mapname) = unique_mapnames.pop()
-        plugmap_name = os.path.join(args.speclog, str(mapmjd), 'plPlugMapM-%s.par' % mapname)
-        plugmap = yanny.yanny(plugmap_name)
+    add_plate_info(plate_info, plate_keys)
 
-        # Construct list of exposure IDs
-        exposures = list()
-        nexp = spPlate.header['NEXP']
-        if (nexp % 4) != 0:
-            print 'Warning, unexpected number of exposures...'
-        for i in range(nexp/4):
-            exposures.append('-'.join(spPlate.header['EXPID%02d'%(i+1)].split('-')[0:2]))
+    if not args.skip_plugmap:
+        add_plugmap_info(plate_info, plugmap_keys)
+        outkeys += ['mapmjd', 'mapname', 'design_alt']
+        outfmts += ['%s', '%s', '%.4f']
 
-        plate_info = {}
-        plate_info['plate'] = plate
-        plate_info['mjd'] = mjd
-        plate_info['mapmjd'] = mapmjd
-        plate_info['mapname'] = mapname
-        plate_info['exposures'] = exposures
-        # Process Plate header keywords
-        for keyword in plate_keys:
-            plate_info[keyword] = spPlate.header[keyword]
-        # Process plugmap header keywords
-        for keyword in plugmap_keys:
-            plate_info[keyword] = plugmap[keyword]
+    if not args.skip_exp:
+        add_exp_info(plate_info, exp_keys)
 
-        design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
-        design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
-        design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
-        design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
-        plate_info['design_alt'] = design_alt.to(u.degree).value
+        for exposure in plate_info['exposures']:
+            exposure_info = plate_info[exposure]
+            outstring = args.delim.join([str(exposure_info[key]) for key in (['mean_alt', 'mean_ha'] + exp_keys)])
+            if args.outdir:
+                expinfo_file.write(outstring)
+                expinfo_file.write('\n')
+            else:
+                print outstring
 
-        # Iterate over exposures and gather information of interest
-        psf_fwhm_list = []
-        ha_list = []
-        alt_list = []
-        rmsoff_list = []
+        outkeys += ['mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff']
+        outfmts += ['%.4f', '%.4f', '%.4f', '%.8f']
 
-        if args.verbose:
-            print args.delim.join([str(plate_info[key]) for key in (new_plate_keys + plate_keys + plugmap_keys)])
-
-        for exposure in exposures:
-            exposure_info = dict()
-            exposure_info['id'] = exposure
-
-            cframe = CFrame(os.path.join(args.bossdir, str(plate), 'spCFrame-%s.fits' % exposure))
-
-            examine_exposure(exposure_info, cframe, cframe_keys)
-
-            if args.verbose:
-                print '\t', args.delim.join([str(exposure_info[key]) for key in (new_exp_keys + cframe_keys)])
-
-            psf_fwhm_list.append(exposure_info['SEEING50'])
-            ha_list.append(exposure_info['mean_ha'])
-            alt_list.append(exposure_info['mean_alt'])
-            rmsoff_list.append(exposure_info['RMSOFF50'])
-
-        if args.verbose:
-            print np.mean(psf_fwhm_list), np.mean(ha_list), np.mean(alt_list)
-
-        plate_info['mean_psf_fwhm'] = np.mean(psf_fwhm_list)
-        plate_info['mean_ha'] = np.mean(ha_list)
-        plate_info['mean_alt'] = np.mean(alt_list)
-        plate_info['mean_rmsoff'] = np.mean(rmsoff_list)
-
-        plate_info_list.append(plate_info)
-
-    if args.output:
-        outkeys = ['plate', 'mjd', 'mapmjd', 'mapname', 'mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff', 'design_alt']
-        outfmt = '%s %s %s %s %.4f %.4f %.4f %.8f %.4f\n'
-        with open(args.output, 'w') as output:
-            for plate_info in plate_info_list:
-                values = [plate_info[key] for key in outkeys]
-                output.write(outfmt % tuple(values))
+    outstring = args.delim.join([fmt % plate_info[key] for key,fmt in zip(outkeys, outfmts)])
+    if args.outdir:
+        combined_file.write(outstring)
+        combined_file.write('\n')
+    else:
+        print outstring
+        print plate_info
 
 if __name__ == '__main__':
     main()
