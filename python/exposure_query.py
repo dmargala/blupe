@@ -67,10 +67,10 @@ def add_exp_info(plate_info, exp_keys):
     plate = plate_info['plate']
 
     # Iterate over exposures and gather information of interest
-    psf_fwhm_sum = 0
-    rmsoff_sum = 0
-    ha_sum = 0
-    alt_sum = 0
+    psf_fwhm_list = []
+    rmsoff_list = []
+    ha_list = []
+    alt_list = []
     nexp = 0
 
     for exposure in plate_info['exposures']:
@@ -83,15 +83,15 @@ def add_exp_info(plate_info, exp_keys):
 
         if exposure_info['SEEING50'] > 0:
             nexp += 1
-            psf_fwhm_sum += exposure_info['SEEING50']
-            rmsoff_sum += exposure_info['RMSOFF50']
-            ha_sum += exposure_info['mean_ha']
-            alt_sum += exposure_info['mean_alt']
+            psf_fwhm_list.append(exposure_info['SEEING50'])
+            rmsoff_list.append(exposure_info['RMSOFF50'])
+        ha_list.append(exposure_info['mean_ha'])
+        alt_list.append(exposure_info['mean_alt'])
 
-    plate_info['mean_psf_fwhm'] = psf_fwhm_sum/nexp
-    plate_info['mean_rmsoff'] = rmsoff_sum/nexp
-    plate_info['mean_ha'] = ha_sum/nexp
-    plate_info['mean_alt'] = alt_sum/nexp
+    plate_info['mean_psf_fwhm'] = np.mean(psf_fwhm_list) if nexp > 0 else 0
+    plate_info['mean_rmsoff'] = np.mean(rmsoff_list) if nexp > 0 else 0
+    plate_info['mean_ha'] = np.mean(ha_list)
+    plate_info['mean_alt'] = np.mean(alt_list)
 
 def add_plate_info(plate_info, plate_keys):
     plate = plate_info['plate']
