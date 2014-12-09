@@ -55,10 +55,22 @@ def examine_exposure(info, cframe, cframe_keys):
     dec = Angle(obs_dec, u.degree)
     ra = Angle(obs_ra, u.degree)
 
-    print taimid
+
 
     time = Time(taimid/86400.0, format='mjd', scale='tai', location=apo)
-    lst = time.sidereal_time('apparent')
+    try:
+        lst = time.sidereal_time('apparent')
+    except IndexError:
+        ## workaround for problem with recent observations relative to astropy release
+        ## http://astropy.readthedocs.org/en/v0.4.2/time/index.html#transformation-offsets
+        from astropy.utils.iers import IERS_A, IERS_A_URL
+        from astropy.utils.data import download_file 
+        iers_a_file = download_file(IERS_A_URL, cache=True)  
+        iers_a = IERS_A.open(iers_a_file)                     
+        time.delta_ut1_utc = time.get_delta_ut1_utc(iers_a)
+
+        lst = time.sidereal_time('apparent')
+
     ha = (lst - ra)
 
     if ha > np.pi*u.radian:
