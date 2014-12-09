@@ -217,17 +217,21 @@ def main():
         summary_keys += ['mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff']
         summary_fmts += ['%.4f', '%.4f', '%.4f', '%.8f']
 
+    header = args.delim.join(summary_keys)
     summary = args.delim.join([fmt % plate_info[key] for key,fmt in zip(summary_keys, summary_fmts)])
+    print header
+    print summary
     if args.outdir:
         summary_filename = os.path.join(args.outdir, 'expinfo-summary-%s-%s.txt' % (plate_info['plate'], plate_info['mjd']))
         with open(summary_filename, 'w') as outfile:
+            outfile.write(header)
+            outfile.write('\n')
             outfile.write(summary)
             outfile.write('\n')
         json_filename = os.path.join(args.outdir, 'expinfo-%s-%s.json' % (plate_info['plate'], plate_info['mjd']))
         with open(json_filename, 'w') as outfile:
             json.dump(plate_info, outfile, sort_keys=True, indent=2)
-    else:
-        print summary
+    if args.verbose:
         print json.dumps(plate_info, sort_keys=True, indent=2)
 
 if __name__ == '__main__':
