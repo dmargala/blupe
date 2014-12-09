@@ -30,13 +30,15 @@ def equatorial_to_horizontal(ra, dec, lat, ha):
     sin_alt = np.sin(dec)*np.sin(lat) + np.cos(dec)*np.cos(lat)*np.cos(ha)
     alt = np.arcsin(sin_alt)
     cos_az = (np.sin(dec) - sin_alt*np.sin(lat))/(np.cos(alt)*np.cos(lat))
+    # arccos occasionally has trouble when cos_az is very close to one,
+    # presumably from floating point precision issues, so clip cos_az
+    cos_az = np.clip(cos_az, -1, 1)
     if np.sin(ha) < 0:
         az = np.arccos(cos_az)
     else:
-        print cos_az
         az = 2*np.pi*u.radian - np.arccos(cos_az)
-        if az == np.nan:
-            print ra, dec, lat, ha, sin_alt, alt, cos_az
+    if np.isnan(az):
+        print ra, dec, lat, ha, sin_alt, alt, cos_az
     return alt, az
 
 def examine_exposure(info, cframe, cframe_keys):
