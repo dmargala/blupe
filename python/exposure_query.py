@@ -207,7 +207,7 @@ def main():
     plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     add_plate_info(plate_info, plate_keys)
 
-    plugmap_keys = []
+    plugmap_keys = ['haMin']
     if not args.skip_plugmap:
         add_plugmap_info(plate_info, plugmap_keys)
         summary_keys += ['mapmjd', 'mapname', 'design_alt']
