@@ -208,14 +208,14 @@ def main():
     plugmap_keys = ['haMin']
     if not args.skip_plugmap:
         add_plugmap_info(plate_info, plugmap_keys)
-        summary_keys += ['mapmjd', 'mapname', 'design_alt']
-        summary_fmts += ['%s', '%s', '%.4f']
+        summary_keys += ['mapmjd', 'mapname']
+        summary_fmts += ['%s', '%s']
 
     exp_keys = ['MJD', 'SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT']
     if not args.skip_exp:
         add_exp_info(plate_info, exp_keys)
-        summary_keys += ['mean_ha', 'mean_psf_fwhm', 'mean_alt', 'mean_rmsoff']
-        summary_fmts += ['%.4f', '%.4f', '%.4f', '%.8f']
+        summary_keys += ['mean_ha', 'mean_psf_fwhm']
+        summary_fmts += ['%.4f', '%.4f']
 
     header = args.delim.join(summary_keys)
     summary = args.delim.join([fmt % plate_info[key] for key,fmt in zip(summary_keys, summary_fmts)])
