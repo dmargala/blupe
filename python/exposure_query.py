@@ -134,7 +134,7 @@ def add_plugmap_info(plate_info, plugmap_keys):
 
     design_ra = Angle(float(plugmap['raCen']), unit=u.degree)
     design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
-    design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
+    design_ha = Angle(float(plugmap['haMin']), unit=u.degree)
     design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
 
     plate_info['design_ra'] = design_ra.to(u.degree).value
@@ -142,8 +142,6 @@ def add_plugmap_info(plate_info, plugmap_keys):
     plate_info['design_ha'] = design_ha.to(u.degree).value
     plate_info['design_alt'] = design_alt.to(u.degree).value
     plate_info['design_az'] = design_az.to(u.degree).value
-
-
 
     
 class CFrame(object):
