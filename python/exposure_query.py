@@ -133,7 +133,15 @@ def add_plugmap_info(plate_info, plugmap_keys):
     design_dec = Angle(float(plugmap['decCen']), unit=u.degree)
     design_ha = Angle(float(plugmap['haMin'])%360, unit=u.degree)
     design_alt, design_az = equatorial_to_horizontal(design_ra, design_dec, apolat, design_ha)
+
+    plate_info['design_ra'] = design_ra.to(u.degree).value
+    plate_info['design_dec'] = design_dec.to(u.degree).value
+    plate_info['design_ha'] = design_ha.to(u.degree).value
     plate_info['design_alt'] = design_alt.to(u.degree).value
+    plate_info['design_az'] = design_az.to(u.degree).value
+
+
+
     
 class CFrame(object):
     def __init__(self, name):
@@ -196,7 +204,7 @@ def main():
     plate_keys = ['SEEING50', 'RMSOFF50', 'AIRMASS', 'ALT', 'BESTEXP', 'NSTD']
     add_plate_info(plate_info, plate_keys)
 
-    plugmap_keys = ['haMin']
+    plugmap_keys = []
     if not args.skip_plugmap:
         add_plugmap_info(plate_info, plugmap_keys)
         summary_keys += ['mapmjd', 'mapname', 'design_alt']
