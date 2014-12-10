@@ -8,7 +8,7 @@ import numpy as np
 
 import matplotlib as mpl
 mpl.use('Agg')
-mpl.rcParams.update({'font.size': 8})
+mpl.rcParams.update({'font.size': 10})
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
@@ -32,10 +32,17 @@ def main():
         help="random seed for example choices")
     parser.add_argument("--scipy", action="store_true",
         help="use scipy.optimize instead of sklearn")
+    parser.add_argument("--exp-info", type=str, default=None,
+        help="add exp info")
+    parser.add_argument("--skip-plots", action="store_true",
+        help="don't make plots")
     args = parser.parse_args()
 
     if args.verbose:
         print 'Reading file: %s' % args.input
+
+    # for now, construct the title from the input filename
+    title = '-'.join((args.input).split('-')[1:])[:-4]
 
     # The input data is text file where each line coresponds to 
     # a target's throughput correction vector
@@ -43,7 +50,7 @@ def main():
     nentries, ntokens = data.shape
 
     # the first two columns are xfocal and yfocal positions of the target
-    nidtokens = 2
+    nidtokens = 3
     # the rest are the tabulated throughput correction values
     npoints = ntokens - nidtokens
 
@@ -60,7 +67,7 @@ def main():
         if args.scipy:
             # chisq function for our model
             def chisq(params):
-                sigma = 1e-1
+                sigma = 1e2
                 pred = 1+params[1]*np.log(xvalues/params[0])+params[2]*np.log(xvalues/params[0])**2
                 residuals = (yvalues - pred)/sigma
                 return np.dot(residuals,residuals)
@@ -90,6 +97,8 @@ def main():
     if args.verbose:
         print 'Mean fitted params (x0, a1, a2): (%.4g, %.4g, %.4g)' % tuple(np.nanmean(results, axis=0))
         print 'Mean chisq: %.4g' % np.mean(chisqs)
+    else:
+        print '%s %.4g %.4g %.4g %.4g' % tuple([title, np.mean(chisqs)] + np.nanmean(results, axis=0).tolist())
 
     # save results to file
     output = '%s-%s' % (args.output, '-'.join((args.input).split('-')[1:]))
@@ -97,11 +106,14 @@ def main():
         print 'Saving results to: %s' % output 
     np.savetxt(output, results)
 
+    if args.skip_plots:
+        return 0
+
     if args.verbose:
         print 'Creating fit summary plot...'
 
     # save results summary plot
-    fig = plt.figure(figsize=(8,8))
+    fig = plt.figure(figsize=(12,12))
 
     ax1 = plt.subplot2grid((4,3), (0,0), colspan=3)
     ax2 = plt.subplot2grid((4,3), (1,0))
@@ -111,6 +123,8 @@ def main():
     ax5 = plt.subplot2grid((4,3), (2,0))
     ax6 = plt.subplot2grid((4,3), (3,0))
     ax7 = plt.subplot2grid((4,3), (3,1))
+
+    ax8 = plt.subplot2grid((4,3), (1,2))
 
     # compare the raw throughput corrections with fit results
     plt.sca(ax1)
@@ -130,10 +144,8 @@ def main():
     plt.ylabel('Throughput Correction')
     plt.ylim([0, 3])
     plt.xlim([3500, 10500])
-    # for now, construct the title from the input filename
-    title = '-'.join((args.input).split('-')[1:])[:-4]
     plt.title(title)
-    plt.grid()
+    plt.grid()        
 
     # plot the fit parameter distributions
     def plot_param_dist(params, binspec, color, xlabel):
@@ -181,7 +193,29 @@ def main():
     plt.sca(ax7)
     plot_param_scatter(results[:,1], results[:,2], (-0.55,2.5), (-1,0.5), r'$a_1$', r'$a_2$')
 
-    plot_name = output[:-4]+'.pdf'
+    plt.sca(ax8)
+    ax8.axis('off')
+
+    if args.exp_info:
+        import json
+        expinfo_filename = '%s-%s.json' % (args.exp_info, title)
+        with open(expinfo_filename) as jsondata:
+            expinfo = json.load(jsondata)
+        keyfmt_pairs = [
+            ('design_alt', '%.2f'),
+            ('mean_alt', '%.2f'),
+            ('design_ha', '%.2f'),
+            ('mean_ha', '%.2f'),
+            ('SEEING50', '%.2f'),
+            ('mean_psf_fwhm', '%.2f')
+        ]
+        textstr = ''
+        textstr += 'n_entries: %d\n' % nentries
+        textstr += 'mean_chisq: %.4g\n' % np.mean(chisqs)
+        textstr += '\n'.join([('%s: '+fmt) % (key, expinfo[key]) for key,fmt in keyfmt_pairs])
+        plt.text(0.95, 0.95, textstr, transform=plt.gca().transAxes, va='top', ha='right')
+
+    plot_name = output[:-4]+'.png'
     if args.verbose:
         print 'Saving fit summary figure to file: %s' % plot_name
     fig.savefig(plot_name, bbox_inches='tight')
