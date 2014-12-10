@@ -97,7 +97,7 @@ def main():
                 # save fit results
                 results[i,:] = result.x
                 chisqs[i] = result.fun
-                if not result.success:
+                if not result.success or result.x[0] == 1:
                     print 'failed on %s-%d: %s' % (title, row[0], results[i])
         else:
             # construct a matrix for the model A + B*Log(x) + C*(Log(x))^2
