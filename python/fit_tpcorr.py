@@ -67,7 +67,7 @@ def main():
         if args.scipy:
             # chisq function for our model
             def chisq(params):
-                sigma = 1e2
+                sigma = 1
                 pred = 1+params[1]*np.log(xvalues/params[0])+params[2]*np.log(xvalues/params[0])**2
                 residuals = (yvalues - pred)/sigma
                 return np.dot(residuals,residuals)
