@@ -67,17 +67,34 @@ def main():
         if args.scipy:
             # chisq function for our model
             def chisq(params):
-                sigma = 1
-                pred = 1+params[1]*np.log(xvalues/params[0])+params[2]*np.log(xvalues/params[0])**2
+                sigma = 1e-1
+                x0 = np.exp(params[0])
+                pred = 1+params[1]*np.log(xvalues/x0)+params[2]*np.log(xvalues/x0)**2
                 residuals = (yvalues - pred)/sigma
                 return np.dot(residuals,residuals)
-            params0 = np.array([4500,1,-.5])
-            result = scipy.optimize.minimize(chisq, params0, method='Nelder-Mead')
+            params0 = np.array([np.log(7000),1,-.5])
+            result = scipy.optimize.minimize(chisq, params0, options={'maxiter':10000},
+                method='Nelder-Mead')
             # save fit results
             results[i,:] = result.x
+            results[i,0] = np.exp(result.x[0])
             chisqs[i] = result.fun
             if not result.success:
-                print result
+                # chisq function for our model
+                def chisq(params):
+                    sigma = 1e-1
+                    x0 = params[0]
+                    pred = 1+params[1]*np.log(xvalues/x0)+params[2]*np.log(xvalues/x0)**2
+                    residuals = (yvalues - pred)/sigma
+                    return np.dot(residuals,residuals)
+                params0 = np.array([7000,1,-.5])
+                result = scipy.optimize.minimize(chisq, params0, options={'maxiter':10000},
+                    method='SLSQP')
+                # save fit results
+                results[i,:] = result.x
+                chisqs[i] = result.fun
+                if not result.success:
+                    print 'failed on %s-%d: %s' % (title, row[0], results[i])
         else:
             # construct a matrix for the model A + B*Log(x) + C*(Log(x))^2
             xmatrix = np.ones((npoints, nparams))
