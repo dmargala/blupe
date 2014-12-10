@@ -46,7 +46,7 @@ def main():
 
     # The input data is text file where each line coresponds to 
     # a target's throughput correction vector
-    data = np.loadtxt(args.input)
+    data = np.loadtxt(args.input, ndmin=2)
 
     try:
         nentries, ntokens = data.shape
