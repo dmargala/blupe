@@ -93,7 +93,7 @@ def main():
                     return np.dot(residuals,residuals)
                 params0 = np.array([7000,1,-.5])
                 result = scipy.optimize.minimize(chisq, params0, options={'maxiter':10000},
-                    method='SLSQP', bounds=((1,None),(None,None),(None,None))
+                    method='SLSQP', bounds=((1,None),(None,None),(None,None)))
                 # save fit results
                 results[i,:] = result.x
                 chisqs[i] = result.fun
