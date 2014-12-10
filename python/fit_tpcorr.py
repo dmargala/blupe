@@ -47,7 +47,11 @@ def main():
     # The input data is text file where each line coresponds to 
     # a target's throughput correction vector
     data = np.loadtxt(args.input)
-    nentries, ntokens = data.shape
+
+    try:
+        nentries, ntokens = data.shape
+    except ValueError:
+        print data.shape, args.input
 
     # the first two columns are xfocal and yfocal positions of the target
     nidtokens = 3
@@ -89,7 +93,7 @@ def main():
                     return np.dot(residuals,residuals)
                 params0 = np.array([7000,1,-.5])
                 result = scipy.optimize.minimize(chisq, params0, options={'maxiter':10000},
-                    method='SLSQP')
+                    method='SLSQP', bounds=((1,None),(None,None),(None,None))
                 # save fit results
                 results[i,:] = result.x
                 chisqs[i] = result.fun
