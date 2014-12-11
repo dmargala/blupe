@@ -1,4 +1,6 @@
-\section{Running the BOSS Pipeline}
+###########################
+##### Modify and rerun pipeline #########
+###########################
 
 Modify the pipeline input files so that the ancillary targets are labeled as spectrophotometric standards. Run the pipeline on the ancillary plates. Results are available at blahblahblah.
 
@@ -9,6 +11,10 @@ Modify the pipeline input files so that the ancillary targets are labeled as spe
     \item Copy and modify the job submission script so it doesn't overwrite custom env variables
 
 \section{Running \texttt{tpcorr}}
+
+###########################
+##### Run tpcorr  #########
+###########################
 
     \item Create plate, mjd list for observations with offset targets: \texttt{work/plate-mjd-lambdaeff-4000.txt}
     \item Run \texttt{expsure\_query.py} all plate, mjd pairs
@@ -57,3 +63,47 @@ done
 
     \item Convert \texttt{plate\_tpcorr.pro} results to release format: 539 targets with \texttt{fiberid == -1}
 ./python/convert_tpcorr_results.py --input 'work/tpcorr/tpcorr-*.txt' --output release.hdf5
+
+###########################
+##### compare magnitudes #########
+###########################
+
+# pre selection
+./examples/filter.py -i /dm/all/data/boss/spAll-v5_7_0.fits -s "['OBJTYPE'] == 'SPECTROPHOTO_STD'" --verbose --output compare_tpcorr/spAll-tpcorr-stds.fits --plates compare_tpcorr/tpcorr_plates.txt
+
+# save annotated target list
+./examples/filter.py -i compare_tpcorr/spAll-tpcorr-stds.fits --verbose --annotate 'psfmag' --save compare_tpcorr/tpcorr-stds.txt
+
+# extract columns of interest 
+cat compare_tpcorr/tpcorr-stds.txt | cut -d' ' -f 3,4,5 > compare_tpcorr/std-mags.txt
+
+# calculate synthetic magnitudes
+./examples/calc_mags.py --targets compare_tpcorr/tpcorr-stds.txt --output compare_tpcorr/std-syn-mags.txt
+
+# copy to local system
+scp hpc:~/source/qusp/compare_tpcorr/std*mags.txt compare_tpcorr/
+
+# compare mags
+./examples/compare_mags.py -y compare_tpcorr/std-mags.txt -x compare_tpcorr/std-syn-mags.txt --output compare_tpcorr/std-syn-vs-psf
+
+########## offset stds
+./examples/filter.py -i /dm/all/data/boss/spAll-v5_7_0.fits -s "['ANCILLARY_TARGET2'] == 1<<20" --verbose --output compare_tpcorr/spAll-tpcorr-offset-stds.fits --plates compare_tpcorr/tpcorr_plates.txt
+
+./examples/filter.py -i compare_tpcorr/spAll-tpcorr-offset-stds.fits --verbose --annotate 'psfmag' --save compare_tpcorr/tpcorr-offset-stds.txt
+
+./examples/calc_mags.py --targets compare_tpcorr/tpcorr-offset-stds.txt --output compare_tpcorr/offset-std-syn-mags.txt
+
+./examples/calc_mags.py --targets compare_tpcorr/tpcorr-offset-stds.txt --output compare_tpcorr/offset-std-syn-mags-anc.txt --boss-version 'test/dmargala/redux/v5_7_0'
+
+./examples/calc_mags.py --targets compare_tpcorr/tpcorr-offset-stds.txt --output compare_tpcorr/offset-std-syn-mags-tpcorr.txt --tpcorr 'data/tpcorr/tpcorr*'
+
+scp hpc:~/source/qusp/compare_tpcorr/offset-std*mags*.txt compare_tpcorr/
+
+##########
+./examples/compare_mags.py -y compare_tpcorr/std-mags.txt -x compare_tpcorr/std-syn-mags.txt --output compare_tpcorr/std-syn-vs-psf
+./examples/compare_mags.py -y compare_tpcorr/offset-std-mags.txt -x compare_tpcorr/offset-std-syn-mags.txt --output compare_tpcorr/offset-std-syn-vs-psf
+./examples/compare_mags.py -y compare_tpcorr/offset-std-mags.txt -x compare_tpcorr/offset-std-syn-mags-anc.txt --output compare_tpcorr/offset-std-syn-anc-vs-psf
+./examples/compare_mags.py -y compare_tpcorr/offset-std-mags.txt -x compare_tpcorr/offset-std-syn-mags-tpcorr.txt --output compare_tpcorr/offset-std-syn-tpcorr-vs-psf
+
+###########################
+###########################
