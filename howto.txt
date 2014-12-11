@@ -1,0 +1,59 @@
+\section{Running the BOSS Pipeline}
+
+Modify the pipeline input files so that the ancillary targets are labeled as spectrophotometric standards. Run the pipeline on the ancillary plates. Results are available at blahblahblah.
+
+    \item Copy speclog and opfiles files and to new speclog dir
+    \item Swap spectrophotometric standards in plugmap files
+    \item Copy pipeline input files \texttt{['spFlat*', 'spArc*', 'spFrame*', 'photo*', '*.par']} into new redux dir
+    \item Set modified speclog and redux environment vars \texttt{SPECLOG\_DIR} and \texttt{BOSS\_SPECTRO\_REDUX}
+    \item Copy and modify the job submission script so it doesn't overwrite custom env variables
+
+\section{Running \texttt{tpcorr}}
+
+    \item Create plate, mjd list for observations with offset targets: \texttt{work/plate-mjd-lambdaeff-4000.txt}
+    \item Run \texttt{expsure\_query.py} all plate, mjd pairs
+        \item 
+cat work/plate-mjd-lambdaeff-4000.txt | \
+awk 'print "python python/exposure_query.py \
+--plate "$1" --mjd "$2" --outdir /data/dmargala/tpcorr/"$1""' > bash/run_info_new.sh
+        \item add header to \texttt{bash/run\_info\_new.sh}:
+#PBS -l nodes=1
+#PBS -l walltime=48:00:00
+#PBS -W umask=0022
+#PBS -V
+#PBS -j oe
+cd $PBS_O_WORKDIR
+        \item Submit to queue: \texttt{qsub bash/run\_info\_new.sh}
+        \item Check invalid azimuth calculation messages: fixed, floating point problem, \texttt{arccos(1.00001) -> NaN} 
+        \item Check sidereal time error: fixed, problem with astropy and conversion of recent times
+        \item Collate results: 
+cat /data/dmargala/tpcorr/????/expinfo-summary-*.txt | \
+awk 'NR % 2 == 0' > expinfo-summary-all.txt
+        \item make plot of \texttt{psf\_fwhm} distribution: medisn psf value is $1.49$
+        \item Fix 79 plates with \texttt{psf\_fwhm == 0}:
+awk '{if($6 == 0) {$6=1.49}; print}' work/expinfo-summary-all.txt > \
+work/expinfo-summary-all-fixed.txt
+
+    \item Run \texttt{plate\_tpcorr.pro} on DR12:
+cat ../work/expinfo-summary-all-fixed.txt | \
+awk '{print "idl -e \"plate_tpcorr, "$1", "$2", "$3", '\''"$4"'\'', "$5", "$6", \
+'\'~/blupe/work/tpcorr/tpcorr-'"$1"-"$2"'.txt\''\""}' > run_tpcorr_new.sh
+split -l 100 -d run_tpcorr_new.sh; \
+for x in $(ls -1 x??); \
+    do cat qsub_header.txt $x > $x.sh; chmod +x $x.sh; rm $x; qsub $x.sh; \
+done
+
+    \item Run \texttt{fit\_tpcorr.py} on {plate\_tpcorr.pro} results
+for f in $(ls -1 work/tpcorr/tpcorr-*.txt); 
+    do echo ./python/fit_tpcorr.py --skip-plots -i $f -o work/tpcorr/fit-tpcorr --scipy; 
+done > run_fit_tpcorr.sh
+split -l 100 -d run_fit_tpcorr.sh; 
+for x in $(ls -1 x??); 
+    do cat pro/qsub_header.txt $x > $x.sh; chmod +x $x.sh; rm $x; qsub $x.sh; 
+done
+
+    \item Summarize model fit results:
+./python/plot_fit_tpcorr_results.py -i 'work/tpcorr/fit-tpcorr-*txt' -o work/fit-tpcorr-summary.png
+
+    \item Convert \texttt{plate\_tpcorr.pro} results to release format: 539 targets with \texttt{fiberid == -1}
+./python/convert_tpcorr_results.py --input 'work/tpcorr/tpcorr-*.txt' --output release.hdf5
