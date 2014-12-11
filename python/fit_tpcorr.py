@@ -233,6 +233,7 @@ def main():
         textstr = ''
         textstr += 'n_entries: %d\n' % nentries
         textstr += 'mean_chisq: %.4g\n' % np.mean(chisqs)
+        textstr += 'nexp: %d\n' % len(expinfo['exposures'])
         textstr += '\n'.join([('%s: '+fmt) % (key, expinfo[key]) for key,fmt in keyfmt_pairs])
         plt.text(0.95, 0.95, textstr, transform=plt.gca().transAxes, va='top', ha='right')
 
