@@ -1,143 +1,90 @@
-%%
-%% Beginning of file 'sample.tex'
-%%
-%% Modified 2005 December 5
-%%
-%% This is a sample manuscript marked up using the
-%% AASTeX v5.x LaTeX 2e macros.
 
-%% The first piece of markup in an AASTeX v5.x document
-%% is the \documentclass command. LaTeX will ignore
-%% any data that comes before this command.
-
-%% The command below calls the preprint style
-%% which will produce a one-column, single-spaced document.
-%% Examples of commands for other substyles follow. Use
-%% whichever is most appropriate for your purposes.
-%%
-%%\documentclass[12pt,preprint]{aastex}
-
-%% manuscript produces a one-column, double-spaced document:
-
-%% \documentclass[manuscript]{aastex}
-
-%% preprint2 produces a double-column, single-spaced document:
-
-\documentclass[preprint2]{aastex}
-
-%% Sometimes a paper's abstract is too long to fit on the
-%% title page in preprint2 mode. When that is the case,
-%% use the longabstract style option.
-
-%% \documentclass[preprint2,longabstract]{aastex}
-
-%% If you want to create your own macros, you can do so
-%% using \newcommand. Your macros should appear before
-%% the \begin{document} command.
-%%
-%% If you are submitting to a journal that translates manuscripts
-%% into SGML, you need to follow certain guidelines when preparing
-%% your macros. See the AASTeX v5.x Author Guide
-%% for information.
-
-%% You can insert a short comment on the title page using the command below.
+\documentclass{emulateapj}
 
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{url}
 
-%\usepackage[a4paper,margin=2cm,footskip=1cm]{geometry}
-
 \providecommand{\eqn}[1]{eqn.~(\ref{eqn:#1})}
 \providecommand{\tab}[1]{Table~\ref{tab:#1}}
 \providecommand{\fig}[1]{Figure~\ref{fig:#1}}
 
-%% This is the end of the preamble.  Indicate the beginning of the
-%% paper itself with \begin{document}.
-
 \begin{document}
 
 \title{BOSS DR12 Quasar Spectra Calibration Correction}
-
-%% Use \author, \affil, and the \and command to format
-%% author and affiliation information.
-%% Note that \email has replaced the old \authoremail command
-%% from AASTeX v4.0. You can use \email to mark an email address
-%% anywhere in the paper, not just in the front matter.
-%% As in the title, use \\ to force line breaks.
 
 \author{D. Margala\altaffilmark{1} and D. Kirkby\altaffilmark{1}}
 \affil{Frederick Reines Hall, Department of Physics and Astronomy, University of California, Irvine, CA, U.S.A.}
 \email{dmargala@uci.edu}
 
 \begin{abstract}
-We present a correction for the effects of atmospheric differential refraction of light and guiding offsets, using focal-plane offsets calculated assuming an ideal guiding scenario for individual observations, of quasar all BOSS DR12 quasar targets which is present due the standard calibration procedure with spectrophotometric standard stars that are offset in the focal plane.
+We present a correction for the effects of atmospheric differential refraction of light and guiding offsets on BOSS fiber throughput, which is present due the standard calibration procedure that uses spectrophotometric standard stars that are offset in the focal plane. We calculate focal plane offsets using an ideal guiding scenario for each observation in BOSS DR12 and provide corrections for all quasar targets.
 \end{abstract}
 
-\keywords{globular clusters: general --- globular clusters: individual(NGC 6397,
-NGC 6624, NGC 7078, Terzan 8}
+\keywords{methods: data analysis --- atmospheric effects --- quasars: general}
 
 \section{Introduction}
 
-Most BOSS targets are drilled to optimize their throughput at 5400\AA. However, quasar targets are optimized for throughput at 4000\AA~by introducing focal plane offsets. An unavoidable side effect of these offsets is to significantly complicate the spectrophotometric calibration of quasar targets using standard stars that do not have the same offsets applied. In particular, atmospheric differential refraction (ADR) and guiding offsets lead to potentially large spectral distortions that are not accounted for in the standard BOSS pipeline, leading to ``calibrated'' exposure sequences such as the one illustrated in Figure (insert figure here).
+Dark energy is cool. We typically charactize dark energy by it's impact on the expansion history of the universe. Measurements of the BAO scale at various redshifts allow us to constrain the expansion history of the univese. BOSS quasar spectra enable a unique measurement of BAO at an important redshift.
 
-The effects of ADR are relatively well understood and straightforward to model.\footnote{\url{http://emtoolbox.nist.gov/Wavelength/Ciddor.asp}}\footnote{\url{http://mintaka.sdsu.edu/GF/explain/atmos_refr/models/Cassini.html}}
+Most objects observed in BOSS were positioned in the focal plane to optimize their throughput at 5400\AA. However, quasars were positioned to optimize throughput at 4000\AA~in order to increase throughput in the Lyman-alpha forest. An unavoidable side effect of these offsets is to significantly complicate the spectrophotometric calibration of quasar targets using standard stars that did not have the same offsets applied. In particular, atmospheric differential refraction (ADR) of light and guiding offsets lead to potentially large spectral distortions that are not accounted for in the standard BOSS pipeline.
+
+We describe a model for the miscalibration of quasar spectra and use it to calculate a correction for all BOSS quasar spectra.
 
 \section{Data}
 
-\subsection{BOSS DR12}
+We use data from the BOSS project of SDSS-III.
 
-\subsubsection{Ancillary Program}
+An object has a unique position (RA, dec) on the sky. A plate \texttt{PLATE} is a set of objects with sky positions transformed to focal plane coordinates for observation at a specific hour angle and optimal throughput wavelength \texttt{LAMBDA\_EFF}. 
 
-We propose to target spectrophotometric standard stars using the same focal-plane offset that is applied to quasar targets. The objectives of this proposal are to:
+An observation corresponds to a unique \texttt{PLATE-MJD}. A target corresponds to a unique \texttt{PLATE-MJD-FIBERID}. An object with multiple observations will correspond to multiple targets.
 
-\begin{itemize}
-\item Calibrate quasar spectra in future observations using the existing pipeline spectrophotometric calibration algorithms combined with offset standard stars. The resulting quasar sample potentially improves any analysis of quasar spectra, and offers a straightforward method for studying the systematics of the present calibration scheme.
-\item Use existing models of the relatively straightforward ADR effects to isolate the effects of guiding errors by comparing standard stars observed with and without offsets in future observations. This offers a potentially valuable new approach for directly monitoring the effects of guiding errors on throughput.
-\item Develop a combined global spectrophotometric calibration that uses standard stars with and without offsets to calibrate all targets on a plate. This would require developing and testing new algorithms but has the potential to improve the calibration of all targets, not just quasars.
-\end{itemize}
+There are a total of 488824 unique targets (\texttt{PLATE-MJD-FIBERID}) with \texttt{LAMBDA\_EFF == 4000} distributed between 2377 unique observations (\texttt{PLATE-MJD}) of 2340 unique plates (\texttt{PLATE}). Fun fact: there are two plates that have only 1 \texttt{LAMBDA\_EFF == 4000} target.
 
-We are requesting 20 fibers per plate (~3 per square degree) to match the current number of spectrophotometric standard stars without focal plane offsets that are targeted per plate. Note that the requested density is determined by the expected scale of spatial variations in the spectrophotometric calibration rather than the density of the quasar targets.
+In addition to the primary BOSS standard stars, a second sample of spectrophotometric standard stars was selected to follow the same offsets in the focal plane as the BOSS quasar targets for a series of plates. These stars were selected and visually inspected to ensure a uniform distribution across the focal plane, in a manner similar to normal spectroscopic standard stars targeted in BOSS. The algorithm for photometric selection applied to this sample was identical to the algorithm for normal spectroscopic standard stars in BOSS, explained in (Dawson 2012). But not exactly because they are chosen with lower priority.
 
-The number of spectrophotometric standard stars required is determined by the large-scale throughput variation across a plate. Ideally, we would like to use the existing targeting algorithm to target an additional ~3 spectrophotometric standard stars per square degree to achieve the same plate coverage (20 per plate) as the existing spectrophotometric standard star targeting. We do not consider incompleteness to be a concern. The program would benefit by having a spatial homogeneity similar to the existing spectrophotometric standard star targeting distribution over a plate. The target density on the sky for the full list of targets used by the existing spectrophotometric standard star selection is shown in Figure 8.
+Standard stars offset in the focal plane are identified by bit 20 of \texttt{ANCILLARY\_TARGET2}. We will refer to these objects as ``offset standards''. There are 1782 unique targets (\texttt{PLATE-MJD-FIBERID}) distributed between 161 unique observations (\texttt{PLATE-MJD}) of 159 unique plates (\texttt{PLATE}). There are 79 unique plates (or obs??? need to check) which contain at least 10 offset standards and 20 unique plates with at least 10 offset standards per spectrograph.
 
-The full list of targets used by the existing spectrophotometric standards star selection is available at %\url{https://trac.sdss3.org/wiki/BOSS/target/releases/main008}
+The PSF FWHM (\texttt{SEEING50}) distribution for all observations in DR12 is shown in \fig{psf-dist}. There are 79 observations from the early days of the survey that do not have psf information and are excluded from the figure.
 
-At the end of the day we ended up with approximately 79 plates with targets.
+\begin{figure}
+\centering
+\includegraphics[width=75mm]{fig/psf_dist}
+\caption{Distribution of psf fwhm for all DR12 observations}
+\label{fig:psf-dist}
+\end{figure}
 
-\subsubsection{Alternate Reduction}
+\subsubsection{Validation Sample}
 
-Modify the pipeline input files so that the ancillary targets are labeled as spectrophotometric standards. Run the pipeline on the ancillary plates. Results are available at blahblahblah.
-
-\subsubsection{Other Samples}
-
-Any comparison of targets observed in both SDSS/BOSS?
-
-Revisit viability of using failed quasar targets as a possible sample?
-
-Since roughly half of the quasar targets in the BOSS DR9 sample are actually stars, it is possible that sufficient observations of spectrophotometric standard stars in fiber holes with quasar focal plane offsets already exist. To investigate this, we examine the color distributions of objects targeted as quasars but classified as stars by the spectroscopic pipeline and compare the results to the spectrophotometric standard star targets. Figure 7 illustrates that there is a small fraction of failed quasars that have bright enough r-band magnitudes but fewer than 0.2\% pass the color space selection cuts for BOSS spectrophotometric standard stars. We estimate that we would need ~35\% passing the color space selection cuts (assuming ideal sky coverage) in order to match the number of targeted spectrophotometric standards without focal plane offsets, so clearly the existing failed quasar sample is not sufficient to meet the goals of this proposal.
-
+For the sample of 79 plates with at least 10 offset standards, we reran the BOSS pipeline using the offset standards for spectrophotometric calibration instead of the normal spectrophotometric standards. This sample provides a vital cross-check for throughput correction model described below. We use, in particular, the sample of 20 plates with at least 10 offset standards in each spectrograph for validation tests. See Appendix X for more details on how the pipeline was modified and where to access the reductions.
 
 \section{Methods}
 
-The correction for each individual target is calculated by estimating the throughput using the actual fiber hole positions and assuming they were positioned using the same focal-plane offset as the calibration targets.
+The basic idea of our correction is to take the ratio of the throughput for a particular fiber as it was positioned in the focal plane and the throughput for that same fiber as if it were positioned with the same offset in the focal plane as the fibers used for calibration.
 
 \subsection{Throughput Calculation}
 
-The throughput for a target is estimated as the overlap fraction, of a 2D Gaussian with variance, $\sigma^2$, offset a distance, $d$, from the center of a circle with diameter $D$ is given by:
+The throughput for a fiber hole is estimated as the overlap fraction of a 2D Gaussian with variance, $\sigma^2$, offset a distance, $d$, from the center of a circle with diameter $D$ is given by:
 
 \begin{equation}
 \label{eq:overlap}
-f(\sigma,d,D) = \frac{1}{\sigma ^2}\int_{0}^{D/2}  r e^{-\frac{d^2+r^2}{2 \sigma ^2}} I_{0}\left[\frac{r d}{\sigma ^2}\right] \mathrm{d}r
+f(\sigma,d,D) = \frac{1}{\sigma ^2}\int_{0}^{D/2}  r e^{-\frac{d^2+r^2}{2 \sigma ^2}} I_{0}\left(\frac{r d}{\sigma ^2}\right) \mathrm{d}r
 \end{equation}
 
-where $I_n(z)$ is a modified Bessel function of the first kind. BOSS fibers have a diameter of 2 arcseconds, so we use this value for D throughout. See \fig{overlap}.
+where $I_n(z)$ is a modified Bessel function of the first kind. BOSS fibers have a diameter of 2 arcseconds, so we use this value for D throughout. An illustration of an offset 2D Gaussian overlapping with fiberhole is shown in \fig{overlap-demo}. See \fig{overlap-psf}.
 
 \begin{figure}
 \centering
 \includegraphics[width=84mm]{fig/overlap}
 \caption{Overlap fraction example.}
-\label{fig:overlap}
+\label{fig:overlap-demo}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/overlap-varypsf}
+\caption{Varying psf fwhm.}
+\label{fig:overlap-psf}
 \end{figure}
 
 The flux throughput correction at a wavelength $\lambda$ is defined as:
@@ -149,11 +96,13 @@ C(\lambda,\sigma_{psf},h) = \frac{f(\sigma_{psf},d(\lambda,h,\lambda_{eff}))}{f(
 
 For BOSS quasar targets, $\lambda_{eff} = 4000$~\AA~and $\lambda_{cal} = 5400$~\AA~because the quasars are calibrated using standard stars offset in the focal-plane. 
 
-The offset distance, $d$, is determined by the guiding model.
+The offset distance, $d(\lambda,h)$, is determined by the guiding model.
 
 \subsection{Ideal Guiding Model}
 
-A guiding model is used to calculate fiber center offsets instead of the formulas above. The guide model determines scale, rotation, and shift corrections to the plate position in order to minimize offsets of the guide stars from the center of their drilled fiber holes. The light path from a target for several different wavelengths for a typical targer is shown in \fig{fiber_hole}. The light path pattern across an entire plate is shown in \fig{plate_guide}. Guiding offsets have a quadrupole structure across the focal plane.
+An ideal guiding model is used to calculate fiber center offsets. The ideal guiding model determines scale, rotation, and x,y-shift corrections to the plate position in order to minimize offsets of the guide stars from the center of their fiber holes. The inputs to the model are guide star fiber positions at the design hour angle of the plate and the observed hour angle. In practice, guiding is not ideal.
+
+The object centroid light path in the focal plane, $d(\lambda,h)$, for a typical object is shown in \fig{fiber_hole}, where the colored lines correspond to constant $\lambda$ and the dashed gray lines show correspond to constant $h$. The centroid focal plane light path, $d(\lambda=\texttt{LAMBDA\_EFF},h)$ for all targets across an entire plate is shown in \fig{plate_guide}. Guiding offsets have a quadrupole structure across the focal plane.
 
 \begin{figure}
 \centering
@@ -169,153 +118,76 @@ A guiding model is used to calculate fiber center offsets instead of the formula
 \label{fig:plate_guide}
 \end{figure}
 
+\subsection{Co-Added Spectra}
+
+The standard pipepline combines individual exposures into a single co-added spectrum. Instead of correcting individual exposures, we use the mean PSF FWHM and observed hour angle of the exposures for an observation and calculate a correction for the coadd. The coadd is a more complicated than this. An alternate simplifying procedure could be to use the PSF FWHM and observed hour angle of the ``best'' exposure as indicated by the pipeline. For the 79 plates without PSF FWHM data, we use the sample median.
+
 \subsection{Correction Parametrization}
 
-We fit a model to the tabulated corrections.
+We fit a 3 parameter model to the tabulated corrections vector for each target of the form:
 
 \begin{equation}
 y = 1 + a_1 \log x/x_0 + a_2 (\log x/x_0)^2
 \end{equation}
 
-See \fig{param} for example fit results.
-
-\begin{figure*}
-\centering
-\includegraphics[width=168mm]{fig/param}
-\caption{Example parametrization fit results.}
-\label{fig:param}
-\end{figure*}
-
-\subsection{Validation}
-
-Clearly demonstarte calibration issue. 
-
-Individual plate comparison.
+The $x_0$ parameter gives the crossover point between of the multiplicative correction. In general, the model indicates that BOSS spectra are overestimated blueward and underestimated redward of the crossover point.
 
 \section{Results}
 
-The Ideal Guiding model gives a correction at each 4000~\AA~fiber. 
+We calculate a thoughput correction for all targets with \texttt{LAMBDA\_EFF == 4000}. The effect of applying the throughput correction for multiple observations of a single object is demonstrated in \fig{adr-vis} and \fig{adr-vis-tpcorr}.
 
-\fig{correction} compares the model predications to the actual ADR effect determined from the ``blue standard'' ancillary science program.
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/adr-vis}
+\caption{BOSS quasar with multiple observations. Smoothed with a 21-pixel wide Savitzky-Golay filter of order 2. Compare to Figure 9 of Lee et al (2012).}
+\label{fig:adr-vis}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/adr-vis-tpcorr}
+\caption{BOSS quasar with multiple observations with throughput correction applied. Smoothed with a 21-pixel wide Savitzky-Golay filter of order 2. Compare to Figure 9 of Lee et al (2012).}
+\label{fig:adr-vis-tpcorr}
+\end{figure}
+
+We use the sample of plates with offset standard stars to validate the correction. See \fig{mag-compare} for a comparison of SDSS imaging magnitudes and synthetic magnitudes before and after correction.
 
 \begin{figure*}
 \centering
-\includegraphics[width=168mm]{fig/tpratio}
-\caption{The corrections for all $\lambda_{eff}$ = 4000~\AA~targets on a plate using the mean observing hour angle and mean PSF size. The transparent lines correspond to correction curves for individual targets while the thick opaque lines correspond the coadded spectrum ratios of the standard and alternate reductions for ancillary targets on this plate. The blue and red colors indicate fibers 1-500 and 501-1000 respectively.}
-\label{fig:correction}
+\includegraphics[width=168mm]{fig/mag-compare}
+\caption{The difference between the synthetic photometry computed from BOSS spectra and the measured photometry from the SDSS imaging data for subsets of stars with SDSS $g < 19$ from a sample of 20 plates that have at least 10 \texttt{ANCILLARY\_TARGET2 \& 1<<20 != 0} in each spectrograph. The black, blue, and red lines indicate $X_{synthetic} - X_{PSF}$ offsets for the $g$, $r$, and $i$ filters respectively. The insets in each panel show statistics for the $g$ filter offsets. Top-Left: Spectrophotometric standard stars (Compare directly top-left panel of Figure 8. in Dawson (2012).) Top-Right: \texttt{ANCILLARY\_TARGET2 \& 1<<20 != 0} stars. Bottom-Left: \texttt{ANCILLARY\_TARGET2 \& 1<<20 != 0} stars, from ``blue'' reduction. Bottom-Right: \texttt{ANCILLARY\_TARGET2 \& 1<<20 != 0} stars, with throughput correction applied.}
+\label{fig:mag-compare}
 \end{figure*}
+
+Finally, we examine the distribution of fitted model parameters to assess the characteristics of the corrections and impact on BOSS spectra.
+
+See \fig{fit-tpcorr-summary} for a summary of model fit results. The plot shows the distribution of mean fitted parameters per plate. Also plot distribution of mean correction per plate?
+
+\begin{figure}
+\centering
+\includegraphics[width=84mm]{fig/fit-tpcorr-summary}
+\caption{Summary of model fits to throughput correction vectors.}
+\label{fig:fit-tpcorr-summary}
+\end{figure}
 
 \section{Conclusion}
 
 The corrections proposed here seem reasonable.
 
-These results also demonstrate the limitations of attempting to correct the quasar spectrophotometric calibration as a post-processing step after of the pipeline, where many simplifying assumptions are required. We believe that in order to achieve better results, it is necessary and desirable to use as much of the existing pipeline calibration algorithms as possible but with spectrophotometric standards observed with the same focal-plane offsets as the quasar targets. In short of including spectrophotometric standards with focal plane offsets, the throughput corrections described here can be applied as a preprocessing step instead of a postprocessing as it has been done here.
-
-
-%% If you wish to include an acknowledgments section in your paper,
-%% separate it off from the body of the text using the \acknowledgments
-%% command.
-
-%% Included in this acknowledgments section are examples of the
-%% AASTeX hypertext markup commands. Use \url without the optional [HREF]
-%% argument when you want to print the url directly in the text. Otherwise,
-%% use either \url or \anchor, with the HREF as the first argument and the
-%% text to be printed in the second.
+These results also demonstrate the limitations of attempting to correct the quasar spectrophotometric calibration as a post-processing step after the pipeline, where many simplifying assumptions are required. We believe that in order to achieve better results, it is necessary and desirable to use as much of the existing pipeline calibration algorithms as possible but with spectrophotometric standards observed with the same focal-plane offsets as the quasar targets. In short of including spectrophotometric standards with focal plane offsets, the throughput corrections described here can be applied as a preprocessing step instead of a postprocessing as it has been done here.
 
 \acknowledgments
 
 We are grateful to ....
 
-%% Appendix material should be preceded with a single \appendix command.
-%% There should be a \section command for each appendix. Mark appendix
-%% subsections with the same markup you use in the main body of the paper.
-
-%% Each Appendix (indicated with \section) will be lettered A, B, C, etc.
-%% The equation counter will reset when it encounters the \appendix
-%% command and will number appendix equations (A1), (A2), etc.
-
 \appendix
 
 \section{Data Access}
 
-Download the data here. Apply corrections to data by doing this.
+Download the throughput corrections here. Apply corrections to observations by doing this. The code used to calculate the corrections is here.
 
-%% The reference list follows the main body and any appendices.
-%% Use LaTeX's thebibliography environment to mark up your reference list.
-%% Note \begin{thebibliography} is followed by an empty set of
-%% curly braces.  If you forget this, LaTeX will generate the error
-%% "Perhaps a missing \item?".
-%%
-%% thebibliography produces citations in the text using \bibitem-\cite
-%% cross-referencing. Each reference is preceded by a
-%% \bibitem command that defines in curly braces the KEY that corresponds
-%% to the KEY in the \cite commands (see the first section above).
-%% Make sure that you provide a unique KEY for every \bibitem or else the
-%% paper will not LaTeX. The square brackets should contain
-%% the citation text that LaTeX will insert in
-%% place of the \cite commands.
+% \begin{thebibliography}{}
 
-%% We have used macros to produce journal name abbreviations.
-%% AASTeX provides a number of these for the more frequently-cited journals.
-%% See the Author Guide for a list of them.
-
-%% Note that the style of the \bibitem labels (in []) is slightly
-%% different from previous examples.  The natbib system solves a host
-%% of citation expression problems, but it is necessary to clearly
-%% delimit the year from the author name used in the citation.
-%% See the natbib documentation for more details and options.
-
-\begin{thebibliography}{}
-\bibitem[Auri\`ere(1982)]{aur82} Auri\`ere, M.  1982, \aap,
-    109, 301
-\bibitem[Canizares et al.(1978)]{can78} Canizares, C. R.,
-    Grindlay, J. E., Hiltner, W. A., Liller, W., \&
-    McClintock, J. E.  1978, \apj, 224, 39
-\bibitem[Djorgovski \& King(1984)]{djo84} Djorgovski, S.,
-    \& King, I. R.  1984, \apjl, 277, L49
-\bibitem[Hagiwara \& Zeppenfeld(1986)]{hag86} Hagiwara, K., \&
-    Zeppenfeld, D.  1986, Nucl.Phys., 274, 1
-\bibitem[Harris \& van den Bergh(1984)]{har84} Harris, W. E.,
-    \& van den Bergh, S.  1984, \aj, 89, 1816
-\bibitem[H\`enon(1961)]{hen61} H\'enon, M.  1961, Ann.d'Ap., 24, 369
-\bibitem[Heiles \& Troland(2003)]{heiles03} Heiles, C. \& Troland, T. H., 2003, \apjs, preprint doi:10.1086/381753
-\bibitem[Kim, Ostricker, \& Stone(2003)]{kim03} Kim, W.-T.,  Ostriker, E., \& Stone, J. M., 2003, \apj, 599, 1157
-\bibitem[King(1966)]{kin66}  King, I. R.  1966, \aj, 71, 276
-\bibitem[King(1975)]{kin75}  King, I. R.  1975, Dynamics of
-    Stellar Systems, A. Hayli, Dordrecht: Reidel, 1975, 99
-\bibitem[King et al.(1968)]{kin68}  King, I. R., Hedemann, E.,
-    Hodge, S. M., \& White, R. E.  1968, \aj, 73, 456
-\bibitem[Kron et al.(1984)]{kro84} Kron, G. E., Hewitt, A. V.,
-    \& Wasserman, L. H.  1984, \pasp, 96, 198
-\bibitem[Lynden-Bell \& Wood(1968)]{lyn68} Lynden-Bell, D.,
-    \& Wood, R.  1968, \mnras, 138, 495
-\bibitem[Newell \& O'Neil(1978)]{new78} Newell, E. B.,
-    \& O'Neil, E. J.  1978, \apjs, 37, 27
-\bibitem[Ortolani et al.(1985)]{ort85} Ortolani, S., Rosino, L.,
-    \& Sandage, A.  1985, \aj, 90, 473
-\bibitem[Peterson(1976)]{pet76} Peterson, C. J.  1976, \aj, 81, 617
-\bibitem[Rudnick et al.(2003)]{rudnick03} Rudnick, G. et al., 2003, \apj, 599, 847
-\bibitem[Spitzer(1985)]{spi85} Spitzer, L.  1985, Dynamics of
-    Star Clusters, J. Goodman \& P. Hut, Dordrecht: Reidel, 109
-\bibitem[Treu et al.(2003)]{treu03} Treu, T. et al., 2003, \apj, 591, 53
-\end{thebibliography}
-
-%% Use the figure environment and \plotone or \plottwo to include
-%% figures and captions in your electronic submission.
-%% To embed the sample graphics in
-%% the file, uncomment the \plotone, \plottwo, and
-%% \includegraphics commands
-%%
-%% If you need a layout that cannot be achieved with \plotone or
-%% \plottwo, you can invoke the graphicx package directly with the
-%% \includegraphics command or use \plotfiddle. For more information,
-%% please see the tutorial on "Using Electronic Art with AASTeX" in the
-%% documentation section at the AASTeX Web site, http://aastex.aas.org/
-%%
-%% The examples below also include sample markup for submission of
-%% supplemental electronic materials. As always, be sure to check
-%% the instructions to authors for the journal you are submitting to
-%% for specific submissions guidelines as they vary from
-%% journal to journal.
+% \end{thebibliography}
 
 \end{document}
