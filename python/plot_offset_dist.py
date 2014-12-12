@@ -28,6 +28,8 @@ def main():
         help="required input file")
     args = parser.parse_args()
 
+    filenames = glog.glob(args.input)
+
     nfiles = len(filenames)
 
     # the first is the fiberid and the next two columns are xfocal and yfocal positions of the target
