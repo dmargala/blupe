@@ -20,7 +20,7 @@
 ; REVISION HISTORY:
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
-pro plate_tpcorr, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename
+pro plate_tpcorr_detailed, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
