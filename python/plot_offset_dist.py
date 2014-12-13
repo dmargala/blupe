@@ -59,8 +59,8 @@ def main():
 
         plt.grid(True)
 
-        fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
-        fig.close()
+        fig.savefig(args.output+('-%d.png'%int(x)), bbox_inches='tight')
+        plt.clf()
 
 if __name__ == '__main__':
     main()
