@@ -32,6 +32,8 @@ def main():
 
     nfiles = len(filenames)
 
+    print 'Reading %d files' % nfiles
+
     # the first is the fiberid and the next two columns are xfocal and yfocal positions of the target
     nidtokens = 3
     # the rest are the tabulated throughput correction values
@@ -39,10 +41,6 @@ def main():
 
     # the throughput correction vectors span the range 3500A to 10500A
     xvalues = np.linspace(3500, 10500, npoints, endpoint=True)
-
-    offset_dict = {}
-    for x in xvalues:
-        offset_dict[x] = []
 
     offsets = []
 
@@ -61,6 +59,8 @@ def main():
             tpcorr = row[nidtokens+2::3]
 
             offsets.append(offsets)
+
+    print 'Read offsets for %d targets ' % len(offsets)
 
     offsets_array = np.vstack(offsets)
 
