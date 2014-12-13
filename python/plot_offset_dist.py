@@ -60,6 +60,7 @@ def main():
         plt.grid(True)
 
         fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
+        fig.close()
 
 if __name__ == '__main__':
     main()
