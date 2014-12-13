@@ -42,43 +42,30 @@ def main():
     # the throughput correction vectors span the range 3500A to 10500A
     xvalues = np.linspace(3500, 10500, npoints, endpoint=True)
 
-    offsets = []
 
-    for i,filename in enumerate(filenames):
-        plate, mjd = filename.split('.')[0].split('-')[-2:]
-        data = np.loadtxt(filename, ndmin=2)
+    data = np.loadtxt(filename, ndmin=2)
 
-        nentries, ntokens = data.shape
-
-        assert ntokens == 3*npoints + nidtokens
-
-        for row in data:
-            fiberid, xfocal, yfocal = row[0:nidtokens]
-            offset = row[nidtokens+0::3]
-            fiber_fraction = row[nidtokens+1::3]
-            tpcorr = row[nidtokens+2::3]
-
-            offsets.append(offsets)
+    offsets = data[:,nidtokens+0::3]
 
     print 'Read offsets for %d targets ' % len(offsets)
 
-    print offsets_array.shape
+    print offsets.shape
 
-    # for i,x in enumerate(xvalues[:2]):
-    #     offsets_wave_slice = offsets_array[:,i]
+    for i,x in enumerate(xvalues):
+        offsets_wave_slice = offsets_array[:,i]
 
-    #     fig = plt.figure(figsize=(8,6))
-    #     plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
-    #     plt.xlabel('Centroid offset (arcseconds)')
-    #     plt.ylabel('Counts')
-    #     plt.title(r%'$\lambda = %s$' % x)
-    #     plt.xlim([0, 2])
+        fig = plt.figure(figsize=(8,6))
+        plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
+        plt.xlabel('Centroid offset (arcseconds)')
+        plt.ylabel('Counts')
+        plt.title(r%'$\lambda = %s$' % x)
+        plt.xlim([0, 2])
 
-    #     add_stat_legend(offsets_wave_slice)
+        add_stat_legend(offsets_wave_slice)
 
-    #     plt.grid(True)
+        plt.grid(True)
 
-    #     fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
+        fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
 
 if __name__ == '__main__':
     main()
