@@ -28,11 +28,6 @@ def main():
         help="required input file")
     args = parser.parse_args()
 
-    filenames = glob.glob(args.input)
-
-    nfiles = len(filenames)
-
-    print 'Reading %d files' % nfiles
 
     # the first is the fiberid and the next two columns are xfocal and yfocal positions of the target
     nidtokens = 3
@@ -42,8 +37,7 @@ def main():
     # the throughput correction vectors span the range 3500A to 10500A
     xvalues = np.linspace(3500, 10500, npoints, endpoint=True)
 
-
-    data = np.loadtxt(filename, ndmin=2)
+    data = np.loadtxt(args.input, ndmin=2)
 
     offsets = data[:,nidtokens+0::3]
 
