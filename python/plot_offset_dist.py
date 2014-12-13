@@ -28,7 +28,7 @@ def main():
         help="required input file")
     args = parser.parse_args()
 
-    filenames = glog.glob(args.input)
+    filenames = glob.glob(args.input)
 
     nfiles = len(filenames)
 
