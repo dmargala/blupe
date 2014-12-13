@@ -64,21 +64,23 @@ def main():
 
     offsets_array = np.vstack(offsets)
 
-    for i,x in enumerate(xvalues):
-        offsets_wave_slice = offsets_array[:,i]
+    print offsets_array.shape
 
-        fig = plt.figure(figsize=(8,6))
-        plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
-        plt.xlabel('Centroid offset (arcseconds)')
-        plt.ylabel('Counts')
-        plt.title(r%'$\lambda = %s$' % x)
-        plt.xlim([0, 2])
+    # for i,x in enumerate(xvalues[:2]):
+    #     offsets_wave_slice = offsets_array[:,i]
 
-        add_stat_legend(offsets_wave_slice)
+    #     fig = plt.figure(figsize=(8,6))
+    #     plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
+    #     plt.xlabel('Centroid offset (arcseconds)')
+    #     plt.ylabel('Counts')
+    #     plt.title(r%'$\lambda = %s$' % x)
+    #     plt.xlim([0, 2])
 
-        plt.grid(True)
+    #     add_stat_legend(offsets_wave_slice)
 
-        fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
+    #     plt.grid(True)
+
+    #     fig.savefig(args.output+'-%s.png'%x, bbox_inches='tight')
 
 if __name__ == '__main__':
     main()
