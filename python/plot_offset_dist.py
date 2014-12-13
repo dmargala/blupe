@@ -46,7 +46,7 @@ def main():
     print offsets.shape
 
     for i,x in enumerate(xvalues):
-        offsets_wave_slice = offsets_array[:,i]
+        offsets_wave_slice = offsets[:,i]
 
         fig = plt.figure(figsize=(8,6))
         plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
