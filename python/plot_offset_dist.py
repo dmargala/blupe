@@ -52,7 +52,7 @@ def main():
         plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
         plt.xlabel('Centroid offset (arcseconds)')
         plt.ylabel('Counts')
-        plt.title(r%'$\lambda = %s$' % x)
+        plt.title(r'$\lambda = %s$' % x)
         plt.xlim([0, 2])
 
         add_stat_legend(offsets_wave_slice)
