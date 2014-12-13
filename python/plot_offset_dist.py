@@ -62,8 +62,6 @@ def main():
 
     print 'Read offsets for %d targets ' % len(offsets)
 
-    offsets_array = np.vstack(offsets)
-
     print offsets_array.shape
 
     # for i,x in enumerate(xvalues[:2]):
