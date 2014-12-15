@@ -130,7 +130,8 @@ lambda_array = lambda_min+(lambda_max-lambda_min)*(findgen(nlambda)/float(nlambd
 ; Create empty arrays to store guiding corrections and position offsets at each wavelength
 tpcorr= fltarr(n4000, nlambda)
 
-save_d = fltarr(n4000, nlambda)
+save_dx = fltarr(n4000, nlambda)
+save_dy = fltarr(n4000, nlambda)
 save_f = fltarr(n4000, nlambda)
 
 for i=0L, nlambda-1L do begin
@@ -146,11 +147,14 @@ for i=0L, nlambda-1L do begin
   ref_offsets = mm_to_arcsec*sqrt((xnew-xfocalref_exp)^2+(ynew-yfocalref_exp)^2)
   tpref = fiberfraction(fwhm, ref_offsets, fiber_diameter)
   ;; Calculate throughput for this wavelength at the actual hole position
+  dx = mm_to_arcsec*(xnew-xfocal4000_exp)
+  dy = mm_to_arcsec*(ynew-yfocal4000_exp)
   offsets = mm_to_arcsec*sqrt((xnew-xfocal4000_exp)^2+(ynew-yfocal4000_exp)^2)
   tp = fiberfraction(fwhm, offsets, fiber_diameter)
   ;; Save throughput correction for this wavelength
   tpcorr[*,i] = tpref/tp
-  save_d[*,i] = offsets
+  save_dx[*,i] = dx
+  save_dy[*,i] = dy
   save_f[*,i] = tp
 endfor
 
@@ -166,7 +170,7 @@ for i=0L, n4000-1L do begin
 	printf, 1, format='(%"%d %f %f ",$)', fiberids4000[i], xfocal4000[i], yfocal4000[i]
   ; print tabulated throughput corrections
 	for j=0L, nlambda-1L do begin
- 		   printf, 1, format='(%"%f %f %f ",$)', save_d[i,j], save_f[i,j], tpcorr[i,j]
+ 		   printf, 1, format='(%"%f %f %f %f ",$)', save_dx[i,j], save_dy[i,j], save_f[i,j], tpcorr[i,j]
 	endfor
 	printf, 1, format='(%"")'
 endfor
