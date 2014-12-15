@@ -20,7 +20,7 @@
 ; REVISION HISTORY:
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
-pro plate_tpcorr_detailed, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename
+pro plate_tpcorr_detailed, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename, IGNORE_HA = ignore_ha
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
@@ -52,6 +52,8 @@ default= definition
 ; Temperature is set per plate in the platePlans.par file
 design_ha=float(strsplit(definition.ha, /extr))
 temp=float(definition.temp)
+
+if (keyword_set(ignore_ha)) then ha = design_ha[pointing-1L]
 
 design_platescale_alt=float(definition.design_platescale_alt)
 mm_to_arcsec = 3600./design_platescale_alt
