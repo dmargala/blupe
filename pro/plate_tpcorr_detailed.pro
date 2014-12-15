@@ -114,7 +114,7 @@ ha_apply, xfocal4000, yfocal4000, xnew=xfocal4000_exp, ynew=yfocal4000_exp, rot=
 ; would be if lambda_eff was 5400
 lambda_ref= replicate(5400., n4000) 
 plate_ad2xy, definition, default, pointing, offset, ra[i4000], dec[i4000], $
-             lambda_ref, xf=xfocalref, yf=yfocalref, lst=racen+design_ha[pointing-1L], $
+             lambda_ref, xf=xfocalref, yf=yfocalref, lst=racen+ha, $
              airtemp=temp
 
 ;; Apply rotation, scale, shift adjustments (i4000 targets)
