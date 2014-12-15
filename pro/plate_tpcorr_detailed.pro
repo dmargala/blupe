@@ -6,12 +6,9 @@
 ;   Calculate throughput corrections
 ;
 ; CALLING SEQUENCE:
-;   plate_tpcorr, plateid, ha, fwhm
+;   plate_tpcorr, ...
 ;
 ; INPUTS:
-;   plateid - plate number
-;   ha - exposure hour angle
-;   fwhm - exposure psf fwhm
 ;
 ; OPTIONAL INPUTS: 
 ;   
@@ -21,6 +18,10 @@
 ;   22-Oct-2014  Written by Daniel Margala (dmargala@uci.edu), UC Irvine.
 ;-
 pro plate_tpcorr_detailed, plateid, mjd, mapmjd, mapname, ha, fwhm, outfilename, IGNORE_HA = ignore_ha
+
+splog, format='(%"plate, mjd, mapmjd, mapname: %s, %s, %s, %s",$)', plateid, mjd, mapmjd, mapname
+splog, format='(%"ha, fwhm: %f, %f",$)', ha, fwhm
+splog, format='(%"outfilename: %s",$)', outfilename
 
 ; Assume guiding for 5400 Angstroms light
 guideon=5400.
