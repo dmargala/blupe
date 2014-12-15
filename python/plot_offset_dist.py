@@ -49,11 +49,12 @@ def main():
         offsets_wave_slice = offsets[:,i]
 
         fig = plt.figure(figsize=(8,6))
-        plt.hist(offsets_wave_slice, bins=50, histtype='stepfilled', alpha=0.5)
+        plt.hist(offsets_wave_slice, bins=np.linspace(0,2,51,endpoint=True), histtype='stepfilled', alpha=0.5)
         plt.xlabel('Centroid offset (arcseconds)')
         plt.ylabel('Counts')
         plt.title(r'$\lambda = %s$' % x)
         plt.xlim([0, 2])
+        plt.ylim([0,120000])
 
         add_stat_legend(offsets_wave_slice)
 
