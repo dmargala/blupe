@@ -49,6 +49,11 @@ def main():
 
         for row in data:
             fiberid, xfocal, yfocal = row[0:nidtokens]
+
+            # skip unplugged fibers
+            if int(fiberid) == -1:
+                continue
+
             tpcorr = row[nidtokens:]
 
             try:
