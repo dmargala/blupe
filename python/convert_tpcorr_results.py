@@ -59,11 +59,11 @@ def main():
             tpcorr = row[nidtokens:]
 
             try:
-                dset = outfile.create_dataset('/'.join([plate,mjd,str(int(fiberid))]), data=tpcorr)
+                dset = outfile.create_dataset('/'.join([plate,mjd,str(int(fiberid))]), data=tpcorr, dtype='f4')
             except RuntimeError, e:
                 print plate, mjd, fiberid, e
-            dset.attrs['xfocal'] = xfocal
-            dset.attrs['yfocal'] = yfocal
+            # dset.attrs['xfocal'] = xfocal
+            # dset.attrs['yfocal'] = yfocal
 
 
 if __name__ == '__main__':
