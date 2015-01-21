@@ -33,7 +33,7 @@ def main():
 
     outfile.create_dataset('wave', data=xvalues)
 
-    for i,filename in enumerate(filenames):
+    for i,filename in enumerate(sorted(filenames)):
         plate, mjd = filename.split('.')[0].split('-')[-2:]
 
         print 'Reading %s...' % filename
