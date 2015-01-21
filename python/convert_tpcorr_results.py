@@ -35,6 +35,8 @@ def main():
 
     for i,filename in enumerate(filenames):
         plate, mjd = filename.split('.')[0].split('-')[-2:]
+
+        print 'Reading %s...'
         data = np.loadtxt(filename, ndmin=2)
 
         if plate not in outfile.keys():
