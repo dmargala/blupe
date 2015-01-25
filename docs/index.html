@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Improved SDSS-III Quasar Calibration</title>
+  <meta name="author" content="Daniel Margala <dmargala@uci.edu>">
+    <style type="text/css">
+        body { background: black; color: white; font-family: Verdana, Arial, sans-serif; }
+        a:link,a:visited { color: #99f; }
+        video { border: 1px dotted #555; }
+    code { font-family: Courier, monospace; }
+    </style>
+  
+<script type="text/javascript">
+
+  // var _gaq = _gaq || [];
+  // _gaq.push(['_setAccount', 'UA-9076621-4']);
+  // _gaq.push(['_trackPageview']);
+
+  // (function() {
+  //   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  //   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  // })();
+
+</script>
+</head>
+
+<body>
+
+<h1>Improved Calibration of the SDSS-III Quasar Sample</h1>
+
+<h2>Introduction</h2>
+
+<ul>
+<li><a href="http://www.sdss.org/">About the Sloan Digital Sky Survey (SDSS).</a></li>
+<li><a href="http://www.sdss.org/surveys/boss/">About the Baryon Oscillation Spectroscopic Survey of SDSS-III.</a></li>
+<li><a href="http://www.sdss.org/dr12/spectro/spectro_basics/">About SDSS spectra.</a></li>
+<li><a href="http://www.sdss.org/dr12/spectro/caveats/#qsoflux">BOSS Quasar flux calibration is wrong.</a></li>
+</ul>
+
+<h2>Documentation</h2>
+
+<p>
+For a detailed description of the improved calibration, see ...
+</p>
+
+<h2>Downloading Corrections for DR12</h2>
+
+<p>
+The current version is tpcorr-0.1, available <a href="http://darkmatter.ps.uci.edu/tpcorr/tpcorr-0.1.tar.gz">here</a>. Note, that this is currently a release candidate and not yet finalized.
+<br><br>
+The corrections can be unpacked using tar via the command:
+<br><br>
+<pre>
+  <code>
+  $ tar xzf tpcorr-0.1.tar.gz
+  </code>
+</pre>
+<br>
+This will create a folder named <code>tpcorr-0.1</code>, which contains 3 files:
+<ul>
+<li><code>README.txt</code>: A text file containing a link to this page.</li>
+<li><code>example_usage.py</code>: An example python program that makes use of the corrections.</li>
+<li><code>tpcorr.hdf5</code>: An <a href="http://www.hdfgroup.org/HDF5/doc/">HDF5</a> file that contains the corrections. The correction for each target is stored as a separate HDF5 Dataset (in python, this similar to a numpy array). The datasets are organized into HDF5 groups and subgroups by SDSS plate ID, observation MJD, and target fiber ID (in python, this is similar to nested dictionaries).</li>
+</ul>
+<br>
+Here is an <a href="http://www.hdfgroup.org/HDF5/Tutor/index.html">HDF5 tutorial</a> from the <a href="http://www.hdfgroup.org/">HDF Group</a> and also a <a href="http://docs.h5py.org/en/latest/quick.html">Python quickstart quide</a>.
+</p>
+
+<p>Send questions and feedback to dmargala at uci.edu</p>
+
+</body>
+</html>
