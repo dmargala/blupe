@@ -41,14 +41,29 @@ def main():
 
     fig = plt.figure(figsize=(8,6))
     plt.hist(psf, bins=50, histtype='stepfilled', alpha=0.5)
-    plt.xlabel('SEEING50 (arcseconds)')
+    plt.xlabel('PSF FWHM (arcseconds)')
     plt.ylabel('Counts')
 
-    add_stat_legend(psf)
+    #add_stat_legend(psf)
 
     plt.grid(True)
 
-    fig.savefig(args.output, bbox_inches='tight')
+    fig.savefig('psf-dist.pdf', bbox_inches='tight')
+
+    ha = data[3]
+
+    print len(ha), np.nanmean(ha), np.nanmedian(ha), np.nanstd(ha)
+
+    fig = plt.figure(figsize=(8,6))
+    plt.hist(ha, bins=50, histtype='stepfilled', alpha=0.5)
+    plt.xlabel('Hour Angle (degrees)')
+    plt.ylabel('Counts')
+
+    #add_stat_legend(ha)
+
+    plt.grid(True)
+
+    fig.savefig('ha-dist.pdf', bbox_inches='tight')
 
 if __name__ == '__main__':
     main()
