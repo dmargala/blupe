@@ -90,10 +90,10 @@ def main():
         plt.gca().set_aspect('equal')
 
         # label plot
-        plt.xlabel('dx (arcseconds)')
-        plt.ylabel('dy (arcseconds)')
-        plt.text(0.05, 0.95, (r'$\lambda = %s\AA$' % x), transform=plt.gca().transAxes, 
-            va='top', ha='left', bbox=dict(boxstyle='round', facecolor='white'))
+        plt.xlabel(r'$x(\lambda,\ h)$ $[\ {}^{\prime\prime}]\ $')
+        plt.ylabel(r'$y(\lambda,\ h)$ $[\ {}^{\prime\prime}]\ $')
+        plt.text(0.05, 0.95, (r'$\lambda = %s\ \AA$' % x), transform=plt.gca().transAxes, 
+            va='top', ha='left', bbox=dict(facecolor='white'))
         plt.grid(True)
 
         # add legend with stat summary

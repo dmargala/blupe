@@ -7,7 +7,9 @@ import numpy as np
 
 import matplotlib as mpl
 mpl.use('Agg')
-mpl.rcParams.update({'font.size': 12})
+mpl.rcParams.update({'font.size': 18})
+mpl.rcParams.update({'savefig.dpi': 200})
+mpl.rcParams.update({'savefig.bbox': 'tight'})
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
@@ -174,7 +176,8 @@ def main():
                 print '%.3f & %.3f & %.3f' % (np.mean(res3[i]), np.sqrt(np.var(res3[i])), nmad(res3[i]))
         # delta mag histograms
         fig = plt.figure(figsize=(8,6))
-        bins = np.linspace(-1,1,51,endpoint=True)
+        bins = np.linspace(-1,1,50,endpoint=False)
+        bins += .5*(bins[1]-bins[0])
         plt.hist(res1[:, i], bins=bins, histtype='stepfilled', color='red', alpha=0.3, label='BOSS')
         plt.hist(res2[:, i], bins=bins, histtype='stepfilled', color='blue', alpha=0.3, label='Corrected BOSS')
         if args.anc_mags:
@@ -183,7 +186,7 @@ def main():
         plt.xlim([-1,1])
         plt.xlabel(r'$\Delta{%s}$'%bands[i])
         plt.ylabel('Counts')
-        plt.legend()
+        plt.legend(prop={'size':12})
         #add_stat_legend(res1, prec=3)
         fig.savefig(args.output+'-residuals-%s.pdf' % (bands[i]), bbox_inches='tight')
 
@@ -204,7 +207,8 @@ def main():
         # delta mag histograms
         fig = plt.figure(figsize=(8,6))
         xlimit = .5
-        bins = np.linspace(-xlimit, xlimit, 41, endpoint=True)
+        bins = np.linspace(-xlimit, xlimit, 40, endpoint=False)
+        bins += .5*(bins[1]-bins[0])
         plt.hist(color_res1[:, i], bins=bins, histtype='stepfilled', color='red', alpha=0.3, label='BOSS')
         plt.hist(color_res2[:, i], bins=bins, histtype='stepfilled', color='blue', alpha=0.3, label='Corrected BOSS')
         if args.anc_mags:
@@ -213,13 +217,13 @@ def main():
         plt.xlim([-xlimit, xlimit])
         plt.xlabel(r'$\Delta{(%s)}$' % colors[i])
         plt.ylabel('Counts')
-        plt.legend()
+        plt.legend(prop={'size':12})
         #add_stat_legend(res1, prec=3)
         fig.savefig(args.output+'-residuals-%s.pdf' % (colors[i]), bbox_inches='tight')
 
         fig = plt.figure(figsize=(8,6))
-        plt.scatter(x1[:, 0], color_res1[:, i], facecolor='red', alpha=0.5, label='BOSS')
-        plt.scatter(x2[:, 0], color_res2[:, i], facecolor='blue', alpha=0.5, label='Corrected BOSS')
+        plt.scatter(x1[:, 0], color_res1[:, i], facecolor='red', alpha=0.5, label='BOSS', edgecolor='none')
+        plt.scatter(x2[:, 0], color_res2[:, i], facecolor='blue', alpha=0.5, label='Corrected BOSS', edgecolor='none')
         # if args.anc_mags:
         #     plt.scatter(x3[:, 0], color_res3[:, i], facecolor='white', alpha=0.5, label='Ancillary Reduction')
 
@@ -236,7 +240,7 @@ def main():
         plt.ylim([-xlimit,+xlimit])
         plt.ylabel(r'$\Delta{(%s)}$' % colors[i])
         plt.xlabel(r'$g$')
-        plt.legend()
+        plt.legend(prop={'size':12})
         plt.grid()
         fig.savefig(args.output+'-scatter-%s.pdf' % (colors[i]), bbox_inches='tight')
 

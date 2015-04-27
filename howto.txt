@@ -107,3 +107,9 @@ scp hpc:~/source/qusp/compare_tpcorr/offset-std*mags*.txt compare_tpcorr/
 
 ###########################
 ###########################
+
+./examples/filter.py --verbose -i /dm/all/data/boss/spAll-v5_7_0.fits -s "(['LAMBDA_EFF'] == 4000) & ((['ZWARNING'] & 1<<7) == 0)" --save data/target_lists/offset-targets.txt --output data/target_lists/offset-targets.fits
+./examples/filter.py --verbose -i /dm/all/data/boss/spAll-v5_7_0.fits -s "(['OBJTYPE'] == 'SPECTROPHOTO_STD') & (['CLASS'] == 'STAR') & (['LAMBDA_EFF'] == 5400) & ((['ZWARNING'] & 1<<7) == 0)" --save data/target_lists/specphoto-stds.txt --output data/target_lists/specphoto-stds.fits
+./examples/filter.py --verbose -i data/target_lists/offset-targets.fits -s "(['OBJTYPE'] == 'QSO') & (['CLASS'] == 'QSO') & (['LAMBDA_EFF'] == 4000) & ((['ZWARNING'] & 1<<7) == 0)" --save data/target_lists/quasars.txt --output data/target_lists/quasars.fits
+./examples/filter.py --verbose -i data/target_lists/offset-targets.fits -s "(['OBJTYPE'] == 'QSO') & (['CLASS'] == 'STAR') & (['LAMBDA_EFF'] == 4000) & ((['ZWARNING'] & 1<<7) == 0)" --save data/target_lists/failed-quasars.txt --output data/target_lists/failed-quasars.fits
+./examples/filter.py --verbose -i data/target_lists/offset-targets.fits -s "(['ANCILLARY_TARGET2'] == 1<<20) & (['CLASS'] == 'STAR') & (['LAMBDA_EFF'] == 4000) & ((['ZWARNING'] & 1<<7) == 0)" --save data/target_lists/offset-stds.txt --output data/target_lists/offset-stds.fits
