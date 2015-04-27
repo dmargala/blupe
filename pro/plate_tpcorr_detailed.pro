@@ -56,9 +56,9 @@ temp=float(definition.temp)
 
 if (keyword_set(ignore_ha)) then ha = design_ha[pointing-1L]
 
-design_platescale_alt=float(definition.design_platescale_alt)
-mm_to_arcsec = 3600./design_platescale_alt
-fiber_diameter = 2.0 
+platescale = 217.7358 ; mm/deg
+mm_to_arcsec = 3600./platescale ; arcsec / mm
+fiber_diameter = 2.0  ; arcsec
 
 ; Calculate ra and dec for center of the plate
 ; The values are accessible through 'racen' and 'deccen' after this
