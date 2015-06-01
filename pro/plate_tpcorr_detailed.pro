@@ -168,7 +168,7 @@ openw, 1, outfilename
 ; iterate over targets
 for i=0L, n4000-1L do begin
   ; print x,y location
-	printf, 1, format='(%"%d %f %f %f %f ",$)', fiberids4000[i], xfocal4000_exp[i], yfocal4000_exp[i], xfocalref_exp[i], yfocalref_exp[i]
+	printf, 1, format='(%"%d %d %d %f %f %f %f ",$)', plateid, mjd, fiberids4000[i], xfocal4000_exp[i], yfocal4000_exp[i], xfocalref_exp[i], yfocalref_exp[i]
   ; print tabulated throughput corrections
 	for j=0L, nlambda-1L do begin
  		   printf, 1, format='(%"%f %f %f ",$)', save_dx[i,j], save_dy[i,j], tpcorr[i,j]
