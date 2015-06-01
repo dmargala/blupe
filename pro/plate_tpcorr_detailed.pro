@@ -58,7 +58,7 @@ if (keyword_set(ignore_ha)) then ha = design_ha[pointing-1L]
 
 platescale = 217.7358 ; mm/deg
 mm_to_arcsec = 3600./platescale ; arcsec / mm
-fiber_diameter = 2.0  ; arcsec
+fiber_diameter = 2.0 ; arcsec
 
 ; Calculate ra and dec for center of the plate
 ; The values are accessible through 'racen' and 'deccen' after this
@@ -168,7 +168,7 @@ openw, 1, outfilename
 ; iterate over targets
 for i=0L, n4000-1L do begin
   ; print x,y location
-	printf, 1, format='(%"%d %f %f %f %f ",$)', fiberids4000[i], xfocal4000[i], yfocal4000[i], xfocalref_exp[i], yfocalref_exp[i]
+	printf, 1, format='(%"%d %f %f %f %f ",$)', fiberids4000[i], xfocal4000_exp[i], yfocal4000_exp[i], xfocalref_exp[i], yfocalref_exp[i]
   ; print tabulated throughput corrections
 	for j=0L, nlambda-1L do begin
  		   printf, 1, format='(%"%f %f %f ",$)', save_dx[i,j], save_dy[i,j], tpcorr[i,j]
