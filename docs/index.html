@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Improved SDSS-III Quasar Calibration</title>
+  <title>Improved Spectrophotometric Calibration of the SDSS-III BOSS Quasar Sample</title>
   <meta name="author" content="Daniel Margala <dmargala@uci.edu>">
     <style type="text/css">
         body { background: black; color: white; font-family: Verdana, Arial, sans-serif; }
@@ -29,7 +29,7 @@
 
 <body>
 
-<h1>Improved Calibration of the SDSS-III Quasar Sample</h1>
+<h1>Improved Spectrophotometric Calibration of the SDSS-III BOSS Quasar Sample</h1>
 
 <h2>Introduction</h2>
 
@@ -43,7 +43,11 @@
 <h2>Documentation</h2>
 
 <p>
-For a detailed description of the improved calibration, see ...
+For a detailed description of the improved calibration, see <a href="http://arxiv.org/abs/1506.04790">"Improved Spectrophotometric Calibration of the SDSS-III BOSS Quasar Sample" (Margala et al., 2015)</a>
+</p>
+
+<p>
+We provide corrections to all "offset" targets from the <code>v5_7_0</code> processing of DR12. An "offset" target is identifiable via the <code>LAMBDA_EFF</code> keyword in <code>spAll</code>, <code>spPlate</code>, or individual <code>spec</code> files, see the <a href="http://data.sdss3.org/datamodel/">data model</a> for more details. For most BOSS targets (i.e. galaxies), <code>LAMBDA_EFF</code>  has a value of 5400 A. For "offset" targets, <code>LAMBDA_EFF</code> has a value of 4000 A. We additionally require that the fiber was plugged (i.e. that the <code>UNPLUGGGED</code> bit of the <a href="http://www.sdss.org/dr12/algorithms/bitmasks/#ZWARNING"><code>ZWARNING</code> bitmask</a> is not set).
 </p>
 
 <h2>Downloading Corrections for DR12</h2>
