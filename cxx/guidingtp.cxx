@@ -1,5 +1,5 @@
 // Created 18-Jul-2013 by Daniel Margala (University of California, Irvine) <dmargala@uci.edu>
-// convert guiding offsets to tp correction 
+// convert guiding offsets to tp correction
 // g++ -lboost_program_options guidingtp.cxx -o guidingtp
 
 #include "boost/program_options.hpp"
@@ -53,7 +53,7 @@ double fiberFraction(double fwhm, double offset, double diameter=2.0/*arcsec*/) 
 }
 
 int main(int argc, char **argv) {
-    
+
     // Configure command-line option processing
     po::options_description cli("Throughput correction");
     double psfmin, psfstep;
